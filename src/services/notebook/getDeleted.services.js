@@ -1,4 +1,4 @@
-const getDeleted = async (id) => {
+const getDeleted = async () => {
   try {
     const result = await window.dbAPI.getTrash();
     console.log("Note retrieved:", result);

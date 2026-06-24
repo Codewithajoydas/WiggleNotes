@@ -1,0 +1,71 @@
+import { useEffect, useRef } from "react";
+
+export default function ContextMenu({ x, y, visible, onClose, items }) {
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    if (!visible) return;
+
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        onClose();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [visible, onClose]);
+
+  if (!visible) return null;
+
+  const MENU_WIDTH = 220;
+  const MENU_HEIGHT = 500; // approximate
+
+  const posX =
+    x + MENU_WIDTH > window.innerWidth
+      ? window.innerWidth - MENU_WIDTH - 10
+      : x;
+
+  const posY =
+    y + MENU_HEIGHT > window.innerHeight
+      ? window.innerHeight - MENU_HEIGHT - 50
+      : y;
+  return (
+    <>
+      <div className="fixed  z-40" onClick={onClose} />
+
+      <div
+        ref={menuRef}
+        className="fixed z-50 min-w-55 max-h-125 overflow-hidden overflow-y-auto rounded-xl border border-zinc-800 bg-zinc-900 shadow-xl"
+        style={{
+          top: posY,
+          left: posX,
+        }}
+      >
+        {items.map((item, index) =>
+          item.separator ? (
+            <div key={index} className="my-1 border-t border-zinc-800" />
+          ) : (
+            <button
+              disabled={item.disabled}
+              key={index}
+              onClick={() => {
+                item.action();
+                onClose();
+              }}
+              className={`flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm hover:bg-zinc-950 ${
+                item.danger ? "text-red-500" : ""
+              } disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-zinc-900`}
+            >
+              {item.icon}
+              {item.label}
+            </button>
+          ),
+        )}
+      </div>
+    </>
+  );
+}

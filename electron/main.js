@@ -3,37 +3,38 @@ import { app, BrowserWindow, ipcMain, Menu } from "electron";
 import path from "path";
 import { fileURLToPath } from "url";
 import process from "process";
-
+import fs from "fs";
+import { dialog } from "electron";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 let db;
 
 function createWindow() {
-    const win = new BrowserWindow({
-        width: 1200,
-        height: 800,
-        icon: path.join(__dirname, "public", "icon.png"),
-        titleBarStyle: "hidden",
-        titleBarOverlay: {
-            color: "#09090b",
-            symbolColor: "#f4f4f5",
-            height: 63,
-        },
+  const win = new BrowserWindow({
+    width: 1200,
+    height: 800,
+    icon: path.join(__dirname, "public", "icon.png"),
+    titleBarStyle: "hidden",
+    titleBarOverlay: {
+      color: "#09090b",
+      symbolColor: "#f4f4f5",
+      height: 63,
+    },
 
-        webPreferences: {
-            preload: path.join(__dirname, "preload.cjs"),
-            contextIsolation: true,
-            nodeIntegration: false,
-            spellcheck: true,
-        },
-    });
-    win.webContents.openDevTools()
+    webPreferences: {
+      preload: path.join(__dirname, "preload.cjs"),
+      contextIsolation: true,
+      nodeIntegration: false,
+      spellcheck: true,
+    },
+  });
+  win.webContents.openDevTools()
 
-    const dbPath = path.join(app.getPath("userData"), "notebook.db");
-    console.log(dbPath);
-    db = new Database(dbPath);
-    db.prepare(`
+  const dbPath = path.join(app.getPath("userData"), "notebook.db");
+  console.log(dbPath);
+  db = new Database(dbPath);
+  db.prepare(`
     CREATE TABLE IF NOT EXISTS notes (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
 
@@ -51,38 +52,38 @@ function createWindow() {
     )
   `).run();
 
-    win.menuBarVisible = false;
+  win.menuBarVisible = false;
 
-    win.webContents.on("context-menu", (event, params) => {
-        const menu = Menu.buildFromTemplate([
-            ...params.dictionarySuggestions.map((suggestion) => ({
-                label: suggestion,
-                click: () => {
-                    win.webContents.replaceMisspelling(suggestion);
-                },
-            })),
+  win.webContents.on("context-menu", (event, params) => {
+    const menu = Menu.buildFromTemplate([
+      ...params.dictionarySuggestions.map((suggestion) => ({
+        label: suggestion,
+        click: () => {
+          win.webContents.replaceMisspelling(suggestion);
+        },
+      })),
 
-            ...(params.misspelledWord
-                ? [
-                    { type: "separator" },
-                    {
-                        label: "Add to Dictionary",
-                        click: () => {
-                            win.webContents.session.addWordToSpellCheckerDictionary(
-                                params.misspelledWord
-                            );
-                        },
-                    },
-                ]
-                : []),
-        ]);
+      ...(params.misspelledWord
+        ? [
+          { type: "separator" },
+          {
+            label: "Add to Dictionary",
+            click: () => {
+              win.webContents.session.addWordToSpellCheckerDictionary(
+                params.misspelledWord
+              );
+            },
+          },
+        ]
+        : []),
+    ]);
 
-        menu.popup();
-    });
+    menu.popup();
+  });
 
-    win.loadURL("http://localhost:5173");
+  win.loadURL("http://localhost:5173");
 
-    // win.webContents.openDevTools();
+  // win.webContents.openDevTools();
 }
 
 app.whenReady().then(createWindow);
@@ -94,20 +95,20 @@ app.whenReady().then(createWindow);
 /* -------------------------------------------------------------------------- */
 
 ipcMain.handle("create-note", (event, note) => {
-    const stmt = db.prepare(`
+  const stmt = db.prepare(`
     INSERT INTO notes (title, content)
     VALUES (?, ?)
   `);
 
-    const result = stmt.run(
-        note?.title || "Untitled",
-        note?.content || ""
-    );
+  const result = stmt.run(
+    note?.title || "Untitled",
+    note?.content || ""
+  );
 
-    return {
-        success: true,
-        id: result.lastInsertRowid,
-    };
+  return {
+    success: true,
+    id: result.lastInsertRowid,
+  };
 });
 
 
@@ -117,14 +118,15 @@ ipcMain.handle("create-note", (event, note) => {
 /* -------------------------------------------------------------------------- */
 
 ipcMain.handle("get-notes", () => {
-    return db.prepare(`
+  return db.prepare(`
     SELECT *
     FROM notes
     WHERE is_deleted = 0
       AND is_archived = 0
     ORDER BY
       is_pinned DESC,
-      updated_at DESC
+      updated_at DESC,
+      id DESC
   `).all();
 });
 
@@ -135,7 +137,7 @@ ipcMain.handle("get-notes", () => {
 /* -------------------------------------------------------------------------- */
 
 ipcMain.handle("get-favorites", () => {
-    return db.prepare(`
+  return db.prepare(`
     SELECT *
     FROM notes
     WHERE
@@ -154,7 +156,7 @@ ipcMain.handle("get-favorites", () => {
 /* -------------------------------------------------------------------------- */
 
 ipcMain.handle("get-archived", () => {
-    return db.prepare(`
+  return db.prepare(`
     SELECT *
     FROM notes
     WHERE
@@ -171,7 +173,7 @@ ipcMain.handle("get-archived", () => {
 /* -------------------------------------------------------------------------- */
 
 ipcMain.handle("get-trash", () => {
-    return db.prepare(`
+  return db.prepare(`
     SELECT *
     FROM notes
     WHERE is_deleted = 1
@@ -186,7 +188,7 @@ ipcMain.handle("get-trash", () => {
 /* -------------------------------------------------------------------------- */
 
 ipcMain.handle("get-note-by-id", (event, id) => {
-    return db.prepare(`
+  return db.prepare(`
     SELECT *
     FROM notes
     WHERE id = ?
@@ -200,7 +202,7 @@ ipcMain.handle("get-note-by-id", (event, id) => {
 /* -------------------------------------------------------------------------- */
 
 ipcMain.handle("update-note", (event, note) => {
-    const stmt = db.prepare(`
+  const stmt = db.prepare(`
     UPDATE notes
     SET
       title = ?,
@@ -209,16 +211,16 @@ ipcMain.handle("update-note", (event, note) => {
     WHERE id = ?
   `);
 
-    const result = stmt.run(
-        note.title,
-        note.content,
-        note.id
-    );
+  const result = stmt.run(
+    note.title,
+    note.content,
+    note.id
+  );
 
-    return {
-        success: true,
-        changes: result.changes,
-    };
+  return {
+    success: true,
+    changes: result.changes,
+  };
 });
 
 
@@ -228,7 +230,7 @@ ipcMain.handle("update-note", (event, note) => {
 /* -------------------------------------------------------------------------- */
 
 ipcMain.handle("toggle-pin", (event, id) => {
-    return db.prepare(`
+  return db.prepare(`
     UPDATE notes
     SET
       is_pinned = CASE
@@ -247,7 +249,7 @@ ipcMain.handle("toggle-pin", (event, id) => {
 /* -------------------------------------------------------------------------- */
 
 ipcMain.handle("toggle-favorite", (event, id) => {
-    return db.prepare(`
+  return db.prepare(`
     UPDATE notes
     SET
       is_favorite = CASE
@@ -266,7 +268,7 @@ ipcMain.handle("toggle-favorite", (event, id) => {
 /* -------------------------------------------------------------------------- */
 
 ipcMain.handle("toggle-archive", (event, id) => {
-    return db.prepare(`
+  return db.prepare(`
     UPDATE notes
     SET
       is_archived = CASE
@@ -285,7 +287,7 @@ ipcMain.handle("toggle-archive", (event, id) => {
 /* -------------------------------------------------------------------------- */
 
 ipcMain.handle("delete-note", (event, id) => {
-    return db.prepare(`
+  return db.prepare(`
     UPDATE notes
     SET
       is_deleted = 1,
@@ -301,7 +303,7 @@ ipcMain.handle("delete-note", (event, id) => {
 /* -------------------------------------------------------------------------- */
 
 ipcMain.handle("restore-note", (event, id) => {
-    return db.prepare(`
+  return db.prepare(`
     UPDATE notes
     SET
       is_deleted = 0,
@@ -317,41 +319,76 @@ ipcMain.handle("restore-note", (event, id) => {
 /* -------------------------------------------------------------------------- */
 
 ipcMain.handle("delete-note-permanently", (event, id) => {
-    return db.prepare(`
+  return db.prepare(`
     DELETE FROM notes
     WHERE id = ?
   `).run(id);
 });
 
 
+ipcMain.handle("rename-note", (_, id, title) => {
+  const result = db.prepare(`
+    UPDATE notes
+    SET
+      title = ?,
+      updated_at = CURRENT_TIMESTAMP
+    WHERE id = ?
+  `).run(title, id);
 
-/* -------------------------------------------------------------------------- */
-/*                                   SEARCH                                   */
-/* -------------------------------------------------------------------------- */
-
-ipcMain.handle("search-notes", (event, query) => {
-    return db.prepare(`
-    SELECT *
-    FROM notes
-    WHERE
-      is_deleted = 0
-      AND (
-        title LIKE ?
-        OR content LIKE ?
-      )
-    ORDER BY
-      is_pinned DESC,
-      updated_at DESC
-  `).all(
-        `%${query}%`,
-        `%${query}%`
-    );
+  return {
+    success: true,
+    changes: result.changes,
+  };
 });
 
 
+/* -------------------------------------------------------------------------- */
+/*                             PRINT NOTES                                   */
+/* -------------------------------------------------------------------------- */
+
+
+
+
+
+ipcMain.handle("export-pdf", async (_, html, fileName) => {
+  const pdfWindow = new BrowserWindow({
+    show: false,
+  });
+
+  await pdfWindow.loadURL(
+    `data:text/html;charset=utf-8,${encodeURIComponent(html)}`
+  );
+
+  const pdf = await pdfWindow.webContents.printToPDF({
+    printBackground: true,
+  });
+
+  const { canceled, filePath } =
+    await dialog.showSaveDialog({
+      title: "Save PDF",
+      defaultPath: `${fileName}.pdf`,
+      filters: [
+        {
+          name: "PDF Files",
+          extensions: ["pdf"],
+        },
+      ],
+    });
+
+  if (canceled || !filePath) {
+    pdfWindow.close();
+    return null;
+  }
+
+  fs.writeFileSync(filePath, pdf);
+
+  pdfWindow.close();
+
+  return filePath;
+});
 
 app.on("window-all-closed", () => {
-    if (process.platform !== "darwin") {
-        app.quit();
-    }
+  if (process.platform !== "darwin") {
+    app.quit();
+  }
 });

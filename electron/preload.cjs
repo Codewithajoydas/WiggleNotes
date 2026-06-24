@@ -48,4 +48,13 @@ contextBridge.exposeInMainWorld("dbAPI", {
     // Search
     searchNotes: (query) =>
         ipcRenderer.invoke("search-notes", query),
+
+    renameNote: (id, title) =>
+        ipcRenderer.invoke("rename-note", id, title),
+    exportPdf: (html, fileName) =>
+        ipcRenderer.invoke(
+            "export-pdf",
+            html,
+            fileName
+        ),
 });

@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import Home from "./Home";
 import CreateFab from "./components/createFab";
@@ -8,13 +8,24 @@ import EditNote from "./pages/UpdateNote";
 import FavNote from "./pages/FavNote";
 import TrashNote from "./pages/TrashNote";
 import Settings from "./pages/Settings";
+import { useEffect } from "react";
+import RestoreRoute from "./pages/RestoreRoute";
 
 function App() {
+  function RouteTracker() {
+    const location = useLocation();
+    useEffect(() => {
+      localStorage.setItem("lastRoute", location.pathname);
+    }, [location]);
+
+    return null;
+  }
   return (
     <BrowserRouter>
+      <RouteTracker />
+      <RestoreRoute/>
       <div className="flex h-screen bg-zinc-900 text-zinc-50">
         <Sidebar />
-
         <main className="flex-1 overflow-auto">
           <Routes>
             <Route path="/" element={<Home />} />

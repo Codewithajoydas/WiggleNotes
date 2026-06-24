@@ -1,4 +1,4 @@
-const favNote = async (id) => {
+const favNote = async () => {
   try {
     const result = await window.dbAPI.getFavorites();
     console.log("Note retrieved:", result);

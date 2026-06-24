@@ -45,10 +45,11 @@ import {
 import CreateFab from "../components/createFab";
 import createNote from "../services/notebook/createNote.services";
 import getNoteById from "../services/notebook/getNoteById.services";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import updateNote from "../services/notebook/updateNote.services";
 
 export default function EditNote() {
+  const navigate = useNavigate();
   const imageInputRef = useRef(null);
   const [editable, setEditable] = useState(true);
   const [title, setTitle] = useState("Untitled Note");
@@ -98,15 +99,42 @@ export default function EditNote() {
       <p>Start writing your thoughts...</p>
     `,
   });
-  useEffect(() => {
-    async function loadNote() {
-      const note = await getNoteById(id);
-      setTitle(note.title);
-      editor?.commands.setContent(JSON.parse(note.content));
+useEffect(() => {
+  async function loadNote() {
+    const note = await getNoteById(id);
+
+    if (!note || note.is_deleted) {
+      navigate("/");
+      return;
     }
 
+    setTitle(note.title);
+    editor?.commands.setContent(JSON.parse(note.content));
+  }
+
+  if (editor) {
     loadNote();
-  }, [id, editor]);
+  }
+}, [id, editor, navigate]);
+  useEffect(() => {
+    const refresh = async () => {
+      const note = await getNoteById(id);
+
+      if (!note || note.is_deleted) {
+        navigate("/");
+        return;
+      }
+
+      setTitle(note.title);
+      editor?.commands.setContent(JSON.parse(note.content));
+    };
+
+    window.addEventListener("note-updated", refresh);
+
+    return () => {
+      window.removeEventListener("note-updated", refresh);
+    };
+  }, [id, editor, navigate]);
   const handleImageUpload = (e) => {
     const file = e.target.files?.[0];
 
@@ -182,7 +210,7 @@ export default function EditNote() {
    };
 
   return (
-    <div className="h-screen flex flex-col bg-zinc-900 text-zinc-100">
+    <div className="h-screen flex flex-col bg-zinc-950 text-zinc-100">
       <div
         className="
    sticky top-0 z-50

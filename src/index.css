@@ -26,7 +26,7 @@ body {
   font-size: 16px;
   line-height: 1.8;
   color: #f4f4f5;
-  background: #09090b;
+  background: #18181b ;
   word-break: break-word;
   caret-color: #3b82f6;
   border-radius: 16px;
@@ -401,7 +401,7 @@ text-decoration: line-through;
 color: #71717a;
 opacity: 0.7;
 }
-  
+
 
 ::-webkit-scrollbar {
   width: 8px;
@@ -409,7 +409,7 @@ opacity: 0.7;
 }
 
 ::-webkit-scrollbar-track {
-  background: #09090b;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {

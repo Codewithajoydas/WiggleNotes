@@ -158,12 +158,13 @@ export default function CreateNote() {
       title: title.trim() ? title : "Untitled Note",
       content: JSON.stringify(editor.getJSON() || {}),
     };
-    await createNote(note);
+    const result = await createNote(note);
+    
     window.dispatchEvent(new CustomEvent("note-updated"));
   };
 
   return (
-    <div className="h-screen flex flex-col bg-zinc-900 text-zinc-100">
+    <div className="h-screen flex flex-col bg-zinc-950 text-zinc-100">
       <div
         className="
     sticky top-0 z-50

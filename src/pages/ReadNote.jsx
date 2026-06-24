@@ -33,23 +33,30 @@ export default function ReadNote() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [note, setNote] = useState(null);
-  const loadNote = async () => {
-    try {
-      const data = await getNoteById(id);
+const loadNote = async () => {
+  try {
+    const data = await getNoteById(id);
 
-      console.log("NOTE:", data);
-
-      // If your service returns { data: note }
-      // change this to: setNote(data.data);
-
-      setNote(data);
-    } catch (error) {
-      console.error(error);
+    if (!data || data.is_deleted) {
+      navigate("/");
+      return;
     }
+
+    setNote(data);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+useEffect(() => {
+  loadNote();
+
+  window.addEventListener("note-updated", loadNote);
+
+  return () => {
+    window.removeEventListener("note-updated", loadNote);
   };
-  useEffect(() => {
-    loadNote();
-  }, [id]);
+}, [id]);
 
   const content = useMemo(() => {
     if (!note?.content) return {};
@@ -149,7 +156,7 @@ export default function ReadNote() {
     }
   };
   return (
-    <div className="h-screen flex flex-col bg-zinc-900">
+    <div className="h-screen flex flex-col bg-zinc-950">
       <Header title={note?.title}>
         <div className="flex items-center gap-1">
           <button

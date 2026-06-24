@@ -10,6 +10,8 @@ import {
   Info,
 } from "lucide-react";
 
+import Header from "../components/Header";
+
 export default function Settings() {
   const SettingRow = ({ icon: Icon, title, value }) => (
     <button
@@ -60,9 +62,8 @@ export default function Settings() {
 
   return (
     <div className="h-full overflow-y-auto bg-zinc-950 text-zinc-100">
+      <Header title="Settings" />
       <div className="max-w-4xl mx-auto p-8">
-        <h1 className="text-3xl font-bold mb-8">Settings</h1>
-
         {/* Appearance */}
         <div className="mb-8">
           <h2 className="text-xs uppercase tracking-widest text-zinc-500 mb-3">

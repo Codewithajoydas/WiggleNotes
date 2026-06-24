@@ -4,6 +4,8 @@ import favNote from "../services/notebook/getFavNotes.services";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import getDeleted from "../services/notebook/getDeleted.services";
+import restoreNote from "../services/notebook/restireNote.services";
+import deletePermanently from "../services/notebook/deleteForever.services";
 
 export default function FavNote() {
   const [notes, setNotes] = useState([]);
@@ -60,19 +62,48 @@ export default function FavNote() {
     return updated.toLocaleDateString();
   };
 
+  const restoreData = async (id) => {
+    try {
+      const result = await restoreNote(id);
+      window.dispatchEvent(new CustomEvent("note-updated"));
+      console.log("Note restored:", result);
+      getNotes();
+    } catch (error) {
+      console.error("Failed to restore note:", error);
+      throw error;
+    }
+  };
+
+  const deleteData = async (id) => {
+    try {
+      const confirm = window.confirm("Are you sure you want to delete?");
+      if (!confirm) return;
+
+      const result = await deletePermanently(id);
+      console.log("Note deleted:", result);
+      getNotes();
+    } catch (error) {
+      console.error("Failed to delete note:", error);
+      throw error;
+    }
+  };
   return (
     <div className="h-full overflow-y-auto bg-zinc-950 text-zinc-100">
       {" "}
       <Header title="Trash" />
-      <div className=" rounded-2xl border border-red-900 bg-red-950/40 p-4 m-6">
-        <h3 className="text-red-400 font-semibold">
-          Items in Trash will be permanently deleted after 30 days
-        </h3>
+      {notes.length !== 0 ? (
+        <div className=" rounded-2xl border border-red-900 bg-red-950/40 p-4 m-6">
+          <h3 className="text-red-400 font-semibold">
+            Items in Trash will be permanently deleted after 30 days
+          </h3>
 
-        <p className="text-red-300/70 text-sm mt-1">
-          Restore notes anytime before automatic removal.
-        </p>
-      </div>
+          <p className="text-red-300/70 text-sm mt-1">
+            Restore notes anytime before automatic removal.
+          </p>
+        </div>
+      ) : (
+        ""
+      )}
       <div className="max-w-7xl mx-auto p-6">
         {notes.length === 0 ? (
           <div className="h-[70vh] flex items-center justify-center">
@@ -204,6 +235,10 @@ export default function FavNote() {
 
                   <div className="flex items-center gap-2">
                     <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        restoreData(note.id);
+                      }}
                       className="
       px-3
       py-1.5
@@ -219,6 +254,10 @@ export default function FavNote() {
                     </button>
 
                     <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteData(note.id);
+                      }}
                       className="
       px-3
       py-1.5
