@@ -10,6 +10,7 @@ import TrashNote from "./pages/TrashNote";
 import Settings from "./pages/Settings";
 import { useEffect } from "react";
 import RestoreRoute from "./pages/RestoreRoute";
+import Templates from "./pages/Templates";
 
 function App() {
   function RouteTracker() {
@@ -23,7 +24,7 @@ function App() {
   return (
     <BrowserRouter>
       <RouteTracker />
-      <RestoreRoute/>
+      <RestoreRoute />
       <div className="flex h-screen bg-zinc-900 text-zinc-50">
         <Sidebar />
         <main className="flex-1 overflow-auto">
@@ -35,6 +36,7 @@ function App() {
             <Route path="/favorites" element={<FavNote />} />
             <Route path="/trash" element={<TrashNote />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/templates" element={<Templates />} />
           </Routes>
         </main>
       </div>

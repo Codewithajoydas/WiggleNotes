@@ -26,7 +26,7 @@ body {
   font-size: 16px;
   line-height: 1.8;
   color: #f4f4f5;
-  background: #18181b ;
+  /* background: #18181b ; */
   word-break: break-word;
   caret-color: #3b82f6;
   border-radius: 16px;
@@ -229,8 +229,6 @@ body {
   color: #93c5fd;
 }
 
-
-
 /* -------------------------------- */
 /* Images */
 /* -------------------------------- */
@@ -402,7 +400,6 @@ color: #71717a;
 opacity: 0.7;
 }
 
-
 ::-webkit-scrollbar {
   width: 8px;
   height: 10px;
@@ -423,4 +420,26 @@ opacity: 0.7;
 
 ::-webkit-scrollbar-thumb:active {
   background: #52525b;
+}
+
+
+@keyframes alert-pop {
+  0% {
+    opacity: 0;
+    transform: translateX(100%) scale(0.9);
+  }
+
+  60% {
+    opacity: 1;
+    transform: translateX(-8px) scale(1.03);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.animate-alert-pop {
+  animation: alert-pop 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }

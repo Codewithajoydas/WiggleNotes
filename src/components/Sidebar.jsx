@@ -9,17 +9,12 @@ import {
   FileText,
   Ellipsis,
   Pin,
-  ExternalLink,
   PenLine,
-  CopyPlus,
   FolderInput,
-  Tags,
-  Scissors,
-  Copy,
-  Clipboard,
   FileCode2,
   FileDown,
   Edit,
+  LayoutTemplate,
 } from "lucide-react";
 import readNote from "../services/notebook/readNote.services";
 import SearchBar from "./Search";
@@ -41,18 +36,52 @@ import TurndownService from "turndown";
 import exportPdf from "../services/notebook/downloadPDFNote";
 import deleteNote from "../services/notebook/deleteNote.services";
 
-const navLinkClass = ({ isActive }) =>
-  `  group
-  flex items-center gap-3
-  px-3 py-2.5
-  rounded-xl
-  transition-all duration-200
-  ${
-    isActive
-      ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20"
-      : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
-  }`;
+// ─── Nav item used for quick actions + collections ────────────────────────────
+function SideNavLink({ to, icon, children }) {
+  return (
+    <NavLink
+      to={to}
+      className={({ isActive }) =>
+        `relative flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all duration-150 group
+        ${
+          isActive
+            ? "text-white bg-white/[0.06]"
+            : "text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.04]"
+        }`
+      }
+    >
+      {({ isActive }) => (
+        <>
+          {isActive && (
+            <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-blue-500 rounded-full" />
+          )}
+          <span
+            className={`transition-colors ${isActive ? "text-blue-400" : "text-zinc-600 group-hover:text-zinc-400"}`}
+          >
+            {icon}
+          </span>
+          <span className="font-medium">{children}</span>
+        </>
+      )}
+    </NavLink>
+  );
+}
 
+// ─── Section label ─────────────────────────────────────────────────────────────
+function SectionLabel({ children, count }) {
+  return (
+    <div className="flex items-center justify-between px-3 mb-1.5 mt-5 first:mt-0">
+      <span className="text-[10px] font-semibold tracking-widest uppercase text-zinc-600">
+        {children}
+      </span>
+      {count !== undefined && (
+        <span className="text-[10px] text-zinc-700 font-mono">{count}</span>
+      )}
+    </div>
+  );
+}
+
+// ─── Main Sidebar ─────────────────────────────────────────────────────────────
 export default function Sidebar() {
   const turndown = new TurndownService();
   const [notes, setNotes] = useState([]);
@@ -64,7 +93,6 @@ export default function Sidebar() {
       const data = await readNote();
       setNotes(data || []);
     };
-
     loadNotes();
   }, []);
 
@@ -73,19 +101,11 @@ export default function Sidebar() {
       const notes = await readNote();
       setNotes(notes || []);
     };
-
     window.addEventListener("note-updated", refresh);
-
-    return () => {
-      window.removeEventListener("note-updated", refresh);
-    };
+    return () => window.removeEventListener("note-updated", refresh);
   }, []);
 
-  const [menu, setMenu] = useState({
-    visible: false,
-    x: 0,
-    y: 0,
-  });
+  const [menu, setMenu] = useState({ visible: false, x: 0, y: 0 });
   const [selectedNote, setSelectedNote] = useState(null);
   const [renameOpen, setRenameOpen] = useState(false);
   const [newTitle, setNewTitle] = useState("");
@@ -93,137 +113,99 @@ export default function Sidebar() {
   const handleContextMenu = (e, note) => {
     e.preventDefault();
     setSelectedNote(note);
-    setMenu({
-      visible: true,
-      x: e.clientX,
-      y: e.clientY,
-    });
+    setMenu({ visible: true, x: e.clientX, y: e.clientY });
   };
 
   const items = [
     {
       label: "Open",
-      icon: <FileText size={16} />,
+      icon: <FileText size={15} />,
       action: () => {
         if (!selectedNote) return;
         navigate(`/read/note/${selectedNote.id}`);
       },
     },
-    {
-      separator: true,
-    },
-
+    { separator: true },
     {
       label: "Rename",
-      icon: <PenLine size={16} />,
+      icon: <PenLine size={15} />,
       action: () => {
         if (!selectedNote) return;
-
         setNewTitle(selectedNote.title);
         setRenameOpen(true);
       },
     },
     {
-      label: "Edit Note",
-      icon: <Edit size={16} />,
+      label: "Edit",
+      icon: <Edit size={15} />,
       action: () => {
         if (!selectedNote) return;
         navigate(`/edit/note/${selectedNote.id}`);
       },
     },
     {
-      label: "Move To Folder",
-      icon: <FolderInput size={16} />,
+      label: "Move to folder",
+      icon: <FolderInput size={15} />,
       action: () => {},
       disabled: true,
     },
-
+    { separator: true },
     {
-      separator: true,
-    },
-
-    {
-      label: selectedNote?.is_favorite ? "Remove Favorite" : "Favorite",
-      icon: <Star size={16} />,
+      label: selectedNote?.is_favorite
+        ? "Remove from favorites"
+        : "Add to favorites",
+      icon: <Star size={15} />,
       action: async () => {
         if (!selectedNote) return;
-
         await favNote(selectedNote.id);
         window.dispatchEvent(new Event("note-updated"));
       },
     },
     {
-      label: selectedNote?.is_pinned ? "Unpin" : "Pin To Top",
-      icon: <Pin size={16} />,
+      label: selectedNote?.is_pinned ? "Unpin" : "Pin to top",
+      icon: <Pin size={15} />,
       action: async () => {
         if (!selectedNote) return;
-
         await pinNote(selectedNote.id);
         window.dispatchEvent(new Event("note-updated"));
       },
     },
-    {
-      separator: true,
-    },
-
+    { separator: true },
     {
       label: "Export as Markdown",
-      icon: <FileCode2 size={16} />,
+      icon: <FileCode2 size={15} />,
       action: () => {
         if (!selectedNote) return;
         const html = generateHTML(JSON.parse(selectedNote.content), [
-          StarterKit.configure({
-            heading: {
-              levels: [1, 2, 3],
-            },
-          }),
-
-          Image.configure({
-            inline: false,
-          }),
-
+          StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
+          Image.configure({ inline: false }),
           Underline,
-
-          Highlight.configure({
-            multicolor: true,
-          }),
-
+          Highlight.configure({ multicolor: true }),
           Link.configure({
             openOnClick: false,
             autolink: true,
             linkOnPaste: true,
           }),
-
           HorizontalRule,
-
           TaskList,
-
-          TaskItem.configure({
-            nested: true,
-          }),
-
-          TextAlign.configure({
-            types: ["heading", "paragraph"],
-          }),
+          TaskItem.configure({ nested: true }),
+          TextAlign.configure({ types: ["heading", "paragraph"] }),
         ]);
         const markdown = turndown.turndown(html);
         const blob = new Blob([markdown], { type: "text/markdown" });
         const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `${selectedNote.title}.md`;
-        link.click();
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${selectedNote.title}.md`;
+        a.click();
       },
     },
     {
       label: "Export as PDF",
-      icon: <FileDown size={16} />,
+      icon: <FileDown size={15} />,
       action: async () => {
         if (!selectedNote) return;
-
-        const content = JSON.parse(selectedNote.content);
-
-        const html = generateHTML(content, [
+        const html = generateHTML(JSON.parse(selectedNote.content), [
           StarterKit,
           Image,
           Underline,
@@ -234,17 +216,13 @@ export default function Sidebar() {
           TaskItem,
           TextAlign,
         ]);
-         await exportPdf(html, selectedNote.title);
+        await exportPdf(html, selectedNote.title);
       },
     },
-
-    {
-      separator: true,
-    },
-
+    { separator: true },
     {
       label: "Delete",
-      icon: <Trash2 size={16} />,
+      icon: <Trash2 size={15} />,
       action: () => {
         if (!selectedNote) return;
         deleteNote(selectedNote.id);
@@ -256,255 +234,211 @@ export default function Sidebar() {
 
   const handleRename = async () => {
     if (!selectedNote) return;
-
-    await renameNotes({
-      id: selectedNote.id,
-      title: newTitle,
-    });
-
+    await renameNotes({ id: selectedNote.id, title: newTitle });
     setRenameOpen(false);
-
     const notes = await readNote();
     setNotes(notes);
-
     window.dispatchEvent(new Event("note-updated"));
   };
+
   return (
     <>
       <aside
         onContextMenu={(e) => e.preventDefault()}
-        className="
-w-72
-h-screen
-bg-zinc-950
-text-white
-flex
-flex-col
-border-r
-border-zinc-800
-"
+        className="w-64 h-screen bg-[#0e0e0e] text-white flex flex-col border-r border-white/[0.06] select-none"
       >
-        {/* Header */}{" "}
-        <div className="h-16 px-4 flex items-center gap-3 border-b border-zinc-800">
-          {" "}
-          <img
-            src="/wigglenote_logo.svg"
-            alt="WiggleNote"
-            className="w-8 h-8"
-          />
-          <div>
-            <h1 className="font-semibold text-white">Wigglenote</h1>
-
-            <p className="text-xs text-zinc-500">Personal Workspace</p>
-          </div>
-        </div>
-        {/* Quick Actions */}
-        <div className="p-3 border-b border-zinc-800">
-          <p className="text-xs uppercase tracking-wider text-zinc-500 mb-3">
-            Quick Actions
-          </p>
-
-          <div
-            className="space-y-2"
-            style={{
-              WebkitAppRegion: "no-drag",
-            }}
-          >
-            <NavLink to="/create-note" className={navLinkClass}>
-              <FilePlus size={18} />
-              Create Note
-            </NavLink>
-
-            <button
-              onClick={() => setSearchOpen(true)}
-              className="
-            w-full
-            flex
-            items-center
-            justify-between
-            px-3
-            py-2.5
-            rounded-xl
-            bg-zinc-900
-            hover:bg-zinc-800
-            transition-colors
-            text-zinc-300
-          "
-            >
-              <div className="flex items-center gap-3">
-                <Search size={18} />
-                Search
-              </div>
-
-              <kbd
-                className="
-              text-[11px]
-              bg-zinc-800
-              px-2
-              py-1
-              rounded-md
-              text-zinc-500
-            "
-              >
-                Ctrl K
-              </kbd>
-            </button>
-          </div>
-        </div>
-        {/* Notes */}
-        <div className="flex-1 overflow-y-auto p-3">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-xs uppercase tracking-wider text-zinc-500">
-              Notes
-            </h3>
-
-            <span className="text-xs text-zinc-600">{notes.length}</span>
-          </div>
-
-          <div
-            className="space-y-1"
-            style={{
-              WebkitAppRegion: "no-drag",
-            }}
-          >
-            <ContextMenu
-              {...menu}
-              items={items}
-              onClose={() =>
-                setMenu((prev) => ({
-                  ...prev,
-                  visible: false,
-                }))
-              }
+        {/* ── Brand header ── */}
+        <div className="flex items-center gap-2.5 px-4 h-14 border-b border-white/[0.06] shrink-0">
+          <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center shrink-0">
+            <img
+              src="/wigglenote_logo.svg"
+              alt=""
+              className="w-4 h-4 invert"
+              onError={(e) => {
+                e.target.style.display = "none";
+                e.target.parentElement.innerHTML =
+                  '<span class="text-white text-xs font-bold">W</span>';
+              }}
             />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-white tracking-tight leading-none">
+              Wigglenote
+            </p>
+            <p className="text-[10px] text-zinc-600 mt-0.5 leading-none">
+              Personal workspace
+            </p>
+          </div>
+        </div>
+
+        {/* ── Scrollable body ── */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden py-3 px-2 space-y-0.5 [&::-webkit-scrollbar]:hidden">
+          {/* Actions */}
+          <SectionLabel>Actions</SectionLabel>
+
+          <NavLink
+            to="/create-note"
+            className={({ isActive }) =>
+              `relative flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all duration-150 group
+              ${
+                isActive
+                  ? "bg-blue-600 text-white shadow-lg shadow-blue-900/30"
+                  : "text-zinc-400 hover:text-zinc-100 hover:bg-white/[0.04]"
+              }`
+            }
+          >
+            <FilePlus size={15} />
+            <span className="font-medium">New note</span>
+          </NavLink>
+
+          <SideNavLink to="/templates" icon={<LayoutTemplate size={15} />}>
+            Templates
+          </SideNavLink>
+
+          {/* Search button */}
+          <button
+            onClick={() => setSearchOpen(true)}
+            className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.04] transition-all group"
+            style={{ WebkitAppRegion: "no-drag" }}
+          >
+            <span className="flex items-center gap-2.5">
+              <Search
+                size={15}
+                className="text-zinc-600 group-hover:text-zinc-400 transition-colors"
+              />
+              <span className="font-medium">Search</span>
+            </span>
+            <kbd className="text-[10px] bg-white/[0.06] text-zinc-600 px-1.5 py-0.5 rounded font-mono">
+              ⌘K
+            </kbd>
+          </button>
+
+          {/* Notes list */}
+          <SectionLabel count={notes.length}>Notes</SectionLabel>
+
+          <div style={{ WebkitAppRegion: "no-drag" }}>
             {notes.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-10 text-center">
-                <FileText size={40} className="text-zinc-700 mb-3" />
-
-                <p className="text-sm font-medium text-zinc-400">
-                  No notes found
+              <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
+                <div className="w-10 h-10 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mb-3">
+                  <FileText size={18} className="text-zinc-700" />
+                </div>
+                <p className="text-xs font-medium text-zinc-500">
+                  No notes yet
                 </p>
-
-                <p className="text-xs text-zinc-600 mt-1">
+                <p className="text-[11px] text-zinc-700 mt-1 leading-relaxed">
                   Create your first note to get started
                 </p>
               </div>
             ) : (
-              notes.map((note) => (
-                <NavLink
-                  onContextMenu={(e) => handleContextMenu(e, note)}
-                  key={note.id}
-                  to={`/read/note/${note.id}`}
-                  className={({ isActive }) =>
-                    `
-        group
-        flex
-        items-center
-        gap-3
-        p-3
-        rounded-xl
-        transition-all
-        duration-200
-        ${isActive ? "bg-zinc-800" : "hover:bg-zinc-900"}
-      `
-                  }
-                >
-                  <FileText size={16} className="text-blue-400 flex-shrink-0" />
-
-                  <div className="flex-1 min-w-0">
-                    <p className="truncate text-sm font-medium text-zinc-200">
-                      {note.title || "Untitled"}
-                    </p>
-                  </div>
-
-                  {note.is_pinned !== 0 && (
-                    <Pin size={16} className="text-zinc-400 flex-shrink-0" />
-                  )}
-
-                  <button
-                    className="
-          opacity-0
-          group-hover:opacity-100
-          transition-opacity
-          text-zinc-500
-          hover:text-white
-        "
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleContextMenu(e, note);
-                    }}
+              <div className="space-y-0.5">
+                {notes.map((note) => (
+                  <NavLink
+                    onContextMenu={(e) => handleContextMenu(e, note)}
+                    key={note.id}
+                    to={`/read/note/${note.id}`}
+                    className={({ isActive }) =>
+                      `relative group flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all duration-150
+                      ${
+                        isActive
+                          ? "bg-white/[0.06] text-white"
+                          : "text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.03]"
+                      }`
+                    }
                   >
-                    <Ellipsis size={16} />
-                  </button>
-                </NavLink>
-              ))
+                    {({ isActive }) => (
+                      <>
+                        {/* Bookmark accent */}
+                        {isActive && (
+                          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-blue-500 rounded-full" />
+                        )}
+
+                        <FileText
+                          size={14}
+                          className={`shrink-0 transition-colors ${isActive ? "text-blue-400" : "text-zinc-700 group-hover:text-zinc-500"}`}
+                        />
+
+                        <span className="flex-1 min-w-0 text-xs font-medium truncate leading-relaxed">
+                          {note.title || "Untitled"}
+                        </span>
+
+                        <div className="flex items-center gap-1 shrink-0">
+                          {note.is_pinned !== 0 && (
+                            <Pin size={11} className="text-zinc-600" />
+                          )}
+                          <button
+                            className="opacity-0 group-hover:opacity-100 transition-opacity text-zinc-600 hover:text-zinc-300 p-0.5 rounded"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleContextMenu(e, note);
+                            }}
+                          >
+                            <Ellipsis size={13} />
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </NavLink>
+                ))}
+              </div>
             )}
           </div>
-        </div>
-        {/* Collections */}
-        <div className="border-t border-zinc-800 p-3">
-          <p className="text-xs uppercase tracking-wider text-zinc-500 mb-3">
-            Collections
-          </p>
 
-          <div
-            className="space-y-2"
-            style={{
-              WebkitAppRegion: "no-drag",
-            }}
-          >
-            <NavLink to="/favorites" className={navLinkClass}>
-              <Star size={18} />
-              Favorites
-            </NavLink>
-
-            <NavLink to="/trash" className={navLinkClass}>
-              <Trash2 size={18} />
-              Trash
-            </NavLink>
-          </div>
+          {/* Collections */}
+          <SectionLabel>Collections</SectionLabel>
+          <SideNavLink to="/favorites" icon={<Star size={15} />}>
+            Favorites
+          </SideNavLink>
+          <SideNavLink to="/trash" icon={<Trash2 size={15} />}>
+            Trash
+          </SideNavLink>
         </div>
-        {/* Footer */}
-        <div className="border-t border-zinc-800 p-3">
-          <div
-            style={{
-              WebkitAppRegion: "no-drag",
-            }}
-          >
-            <NavLink to="/settings" className={navLinkClass}>
-              <Settings size={18} />
-              Settings
-            </NavLink>
-          </div>
+
+        {/* ── Footer ── */}
+        <div className="shrink-0 border-t border-white/[0.06] px-2 py-2">
+          <SideNavLink to="/settings" icon={<Settings size={15} />}>
+            Settings
+          </SideNavLink>
         </div>
       </aside>
 
+      <ContextMenu
+        {...menu}
+        items={items}
+        onClose={() => setMenu((prev) => ({ ...prev, visible: false }))}
+      />
       <SearchBar open={searchOpen} onClose={() => setSearchOpen(false)} />
-      {renameOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-zinc-900 p-5 rounded-xl w-96 border border-zinc-800">
-            <h2 className="text-lg font-semibold mb-4">Rename Note</h2>
 
+      {/* ── Rename modal ── */}
+      {renameOpen && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-[#161616] border border-white/[0.08] rounded-2xl p-5 w-80 shadow-2xl">
+            <h2 className="text-sm font-semibold text-zinc-100 mb-1">
+              Rename note
+            </h2>
+            <p className="text-xs text-zinc-600 mb-4">
+              Enter a new title for this note.
+            </p>
             <input
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-zinc-800 outline-none"
-              placeholder="Enter note title"
+              onKeyDown={(e) => e.key === "Enter" && handleRename()}
+              autoFocus
+              className="w-full px-3 py-2 text-sm rounded-lg bg-white/[0.05] border border-white/[0.08] text-zinc-100 placeholder:text-zinc-600 outline-none focus:border-blue-500/50 transition-colors"
+              placeholder="Note title"
             />
-
             <div className="flex justify-end gap-2 mt-4">
               <button
                 onClick={() => setRenameOpen(false)}
-                className="px-4 py-2 rounded-lg bg-zinc-800"
+                className="px-3 py-1.5 text-xs rounded-lg bg-white/[0.05] text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.08] transition-colors"
               >
                 Cancel
               </button>
-
               <button
                 onClick={handleRename}
-                className="px-4 py-2 rounded-lg bg-blue-600"
+                className="px-3 py-1.5 text-xs rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors"
               >
-                Save
+                Rename
               </button>
             </div>
           </div>

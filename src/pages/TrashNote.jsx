@@ -6,11 +6,26 @@ import Header from "../components/Header";
 import getDeleted from "../services/notebook/getDeleted.services";
 import restoreNote from "../services/notebook/restireNote.services";
 import deletePermanently from "../services/notebook/deleteForever.services";
+import Confirm from "../components/ui/Confirm";
+import Alert from "../components/ui/alert";
 
 export default function FavNote() {
   const [notes, setNotes] = useState([]);
   const navigate = useNavigate();
+  const [alert, setAlert] = useState(null);
+  const showAlert = ({ type, title, message }) => {
+    setAlert(null);
 
+    requestAnimationFrame(() => {
+      setAlert({
+        type,
+        title,
+        message,
+      });
+    });
+  };
+  const [open, setOpen] = useState(false);
+  const [id, setId] = useState(null);
   useEffect(() => {
     getNotes();
   }, []);
@@ -65,10 +80,19 @@ export default function FavNote() {
   const restoreData = async (id) => {
     try {
       const result = await restoreNote(id);
+      showAlert({
+        type: "success",
+        title: "Success",
+        message: "Note restored successfully",
+      });
       window.dispatchEvent(new CustomEvent("note-updated"));
-      console.log("Note restored:", result);
       getNotes();
     } catch (error) {
+      showAlert({
+        type: "error",
+        title: "Error",
+        message: "Failed to restore note",
+      });
       console.error("Failed to restore note:", error);
       throw error;
     }
@@ -76,9 +100,6 @@ export default function FavNote() {
 
   const deleteData = async (id) => {
     try {
-      const confirm = window.confirm("Are you sure you want to delete?");
-      if (!confirm) return;
-
       const result = await deletePermanently(id);
       console.log("Note deleted:", result);
       getNotes();
@@ -137,7 +158,6 @@ export default function FavNote() {
             {notes.map((note) => (
               <div
                 key={note.id}
-                onClick={() => navigate(`/read/note/${note.id}`)}
                 className="
               group
               bg-zinc-900
@@ -256,7 +276,8 @@ export default function FavNote() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        deleteData(note.id);
+                        setId(note.id);
+                        setOpen(true);
                       }}
                       className="
       px-3
@@ -278,6 +299,20 @@ export default function FavNote() {
           </div>
         )}
       </div>
+      <Confirm
+        open={open}
+        title="Delete Note"
+        message="This note will be permanently deleted. This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Keep"
+        confirmVariant="danger"
+        onCancel={() => setOpen(false)}
+        onConfirm={() => {
+          deleteData(id);
+          setOpen(false);
+        }}
+      />
+      {alert && <Alert {...alert} onClose={() => setAlert(null)} />}
     </div>
   );
 }

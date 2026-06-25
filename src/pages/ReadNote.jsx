@@ -18,8 +18,13 @@ import {
   Star,
   Pin,
   MoreVertical,
-  Pen,
-  Trash,
+  Trash2,
+  FileCode2,
+  FileDown,
+  FolderInput,
+  PenLine,
+  Edit,
+  FileText,
 } from "lucide-react";
 
 import CreateFab from "../components/createFab";
@@ -27,115 +32,94 @@ import getNoteById from "../services/notebook/getNoteById.services";
 import deleteNote from "../services/notebook/deleteNote.services";
 import favNote from "../services/notebook/favNote.services";
 import pinNote from "../services/notebook/pinNote.services";
+import ContextMenu from "../components/contextMenu";
 import Header from "../components/Header";
+
+// ─── Icon button used in the header bar ──────────────────────────────────────
+function HeaderAction({ onClick, active, danger, title, children }) {
+  return (
+    <button
+      title={title}
+      onClick={onClick}
+      className={`
+        h-8 w-8 rounded-lg flex items-center justify-center transition-all duration-150
+        ${
+          danger
+            ? "text-zinc-600 hover:bg-red-500/10 hover:text-red-400"
+            : active
+              ? "text-blue-400 bg-blue-500/10"
+              : "text-zinc-600 hover:bg-white/[0.06] hover:text-zinc-300"
+        }
+      `}
+    >
+      {children}
+    </button>
+  );
+}
 
 export default function ReadNote() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [note, setNote] = useState(null);
-const loadNote = async () => {
-  try {
-    const data = await getNoteById(id);
 
-    if (!data || data.is_deleted) {
-      navigate("/");
-      return;
+  const loadNote = async () => {
+    try {
+      const data = await getNoteById(id);
+      if (!data || data.is_deleted) {
+        navigate("/");
+        return;
+      }
+      setNote(data);
+    } catch (error) {
+      console.error(error);
     }
-
-    setNote(data);
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-useEffect(() => {
-  loadNote();
-
-  window.addEventListener("note-updated", loadNote);
-
-  return () => {
-    window.removeEventListener("note-updated", loadNote);
   };
-}, [id]);
+
+  useEffect(() => {
+    loadNote();
+    window.addEventListener("note-updated", loadNote);
+    return () => window.removeEventListener("note-updated", loadNote);
+  }, [id]);
 
   const content = useMemo(() => {
     if (!note?.content) return {};
-
     try {
       return JSON.parse(note.content);
-    } catch (error) {
-      console.error(error);
+    } catch {
       return {};
     }
   }, [note]);
 
   const editor = useEditor({
     immediatelyRender: false,
-
     editable: false,
-
     extensions: [
-      StarterKit.configure({
-        heading: {
-          levels: [1, 2, 3],
-        },
-      }),
-
-      Image.configure({
-        inline: false,
-      }),
-
+      StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
+      Image.configure({ inline: false }),
       Underline,
-
-      Highlight.configure({
-        multicolor: true,
-      }),
-
-      Link.configure({
-        openOnClick: true,
-        autolink: true,
-        linkOnPaste: true,
-      }),
-
+      Highlight.configure({ multicolor: true }),
+      Link.configure({ openOnClick: true, autolink: true, linkOnPaste: true }),
       HorizontalRule,
-
       TaskList,
-
-      TaskItem.configure({
-        nested: true,
-      }),
-
-      TextAlign.configure({
-        types: ["heading", "paragraph"],
-      }),
+      TaskItem.configure({ nested: true }),
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
     ],
-
     content: {},
   });
 
   useEffect(() => {
-    if (editor && note) {
-      editor.commands.setContent(content);
-    }
+    if (editor && note) editor.commands.setContent(content);
   }, [editor, note, content]);
 
-  if (!editor || !note) {
-    return (
-      <div className="h-screen flex items-center justify-center">
-        Loading...
-      </div>
-    );
-  }
-
   const handleDelete = async () => {
+    const ok = window.confirm("Delete this note? This cannot be undone.");
+    if (!ok) return;
     try {
-      const confirmation = window.confirm("Are you sure you want to delete?");
-      if (!confirmation) return;
       await deleteNote(note.id);
       window.dispatchEvent(new CustomEvent("note-updated"));
       navigate("/");
-    } catch (error) {
-      console.error(error);
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -143,81 +127,216 @@ useEffect(() => {
     try {
       await pinNote(note.id);
       loadNote();
-    } catch (error) {
-      console.error(error);
+    } catch (e) {
+      console.error(e);
     }
   };
+
   const handleFav = async () => {
     try {
       await favNote(note.id);
       loadNote();
-    } catch (error) {
-      console.error(error);
+    } catch (e) {
+      console.error(e);
     }
   };
+
+  const [menu, setMenu] = useState({ visible: false, x: 0, y: 0 });
+
+  const items = [
+    {
+      label: "Edit",
+      icon: <Edit size={15} />,
+      action: () => navigate(`/edit/note/${note.id}`),
+    },
+    { separator: true },
+    { label: "Rename", icon: <PenLine size={15} />, action: () => {} },
+    {
+      label: "Move to folder",
+      icon: <FolderInput size={15} />,
+      action: () => {},
+      disabled: true,
+    },
+    { separator: true },
+    {
+      label: note?.is_favorite ? "Remove from favorites" : "Add to favorites",
+      icon: <Star size={15} />,
+      action: handleFav,
+    },
+    {
+      label: note?.is_pinned ? "Unpin" : "Pin to top",
+      icon: <Pin size={15} />,
+      action: handlePin,
+    },
+    { separator: true },
+    {
+      label: "Export as Markdown",
+      icon: <FileCode2 size={15} />,
+      action: () => {},
+    },
+    { label: "Export as PDF", icon: <FileDown size={15} />, action: () => {} },
+    { separator: true },
+    {
+      label: "Delete",
+      icon: <Trash2 size={15} />,
+      action: handleDelete,
+      danger: true,
+    },
+  ];
+
+  // Cover style (matches CreateNote cover system)
+  const coverStyle = note?.cover
+    ? note.cover.type === "image"
+      ? {
+          backgroundImage: `url(${note.cover.value})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }
+      : { background: note.cover.value }
+    : null;
+
+  if (!editor || !note) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-[#0e0e0e]">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center animate-pulse">
+            <FileText size={16} className="text-zinc-700" />
+          </div>
+          <p className="text-xs text-zinc-600">Loading note…</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="h-screen flex flex-col bg-zinc-950">
-      <Header title={note?.title}>
-        <div className="flex items-center gap-1">
-          <button
-            className="h-9 w-9 rounded-lg hover:bg-zinc-800 flex items-center justify-center text-zinc-300 hover:text-white transition-colors"
+    <div className="h-screen flex flex-col bg-[#0e0e0e] text-zinc-100">
+      {/* ── Header ── */}
+    
+      <Header>
+        {/* Actions */}
+        <div className="flex items-center gap-0.5">
+          <HeaderAction
+            title="Edit note"
             onClick={() => navigate(`/edit/note/${note.id}`)}
           >
-            <Pen size={18} />
-          </button>
+            <Pencil size={15} />
+          </HeaderAction>
 
-          <button
-            className="h-9 w-9 rounded-lg hover:bg-zinc-800 flex items-center justify-center text-zinc-300 hover:text-white transition-colors"
+          <HeaderAction
+            title={
+              note.is_favorite ? "Remove from favorites" : "Add to favorites"
+            }
+            active={!!note.is_favorite}
             onClick={handleFav}
           >
-            {note?.is_favorite ? (
-              <Star size={18} className="fill-yellow-400 stroke-yellow-400" />
-            ) : (
-              <Star size={18} />
-            )}
-          </button>
+            <Star
+              size={15}
+              className={
+                note.is_favorite ? "fill-yellow-400 stroke-yellow-400" : ""
+              }
+            />
+          </HeaderAction>
 
-          <button
-            className="h-9 w-9 rounded-lg hover:bg-zinc-800 flex items-center justify-center text-zinc-300 hover:text-white transition-colors"
+          <HeaderAction
+            title={note.is_pinned ? "Unpin" : "Pin to top"}
+            active={!!note.is_pinned}
             onClick={handlePin}
           >
-            {note?.is_pinned ? (
-              <Pin size={18} className="fill-blue-400 stroke-blue-400" />
-            ) : (
-              <Pin size={18} />
-            )}
-          </button>
+            <Pin
+              size={15}
+              className={note.is_pinned ? "fill-blue-400 stroke-blue-400" : ""}
+            />
+          </HeaderAction>
 
-          <button
-            className="h-9 w-9 rounded-lg hover:bg-red-950 text-red-400 hover:text-red-300 flex items-center justify-center transition-colors"
-            onClick={handleDelete}
+          <HeaderAction title="Delete note" danger onClick={handleDelete}>
+            <Trash2 size={15} />
+          </HeaderAction>
+
+          <HeaderAction
+            title="More options"
+            onClick={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              setMenu({
+                visible: true,
+                x: rect.right - 180,
+                y: rect.bottom + 6,
+              });
+            }}
           >
-            <Trash size={18} />
-          </button>
-
-          <button className="h-9 w-9 rounded-lg hover:bg-zinc-800 flex items-center justify-center text-zinc-300 hover:text-white transition-colors">
-            <MoreVertical size={18} />
-          </button>
+            <MoreVertical size={15} />
+          </HeaderAction>
         </div>
       </Header>
+
+      {/* ── Cover banner ── */}
+      {coverStyle && (
+        <div className="w-full h-36 shrink-0 relative" style={coverStyle}>
+          <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-[#0e0e0e] to-transparent" />
+        </div>
+      )}
+
+      {/* ── Content ── */}
       <main className="flex-1 overflow-auto">
-        <div className="max-w-5xl mx-auto px-8 py-4">
+        <div className="max-w-3xl mx-auto px-8 py-8">
+          {/* Note title displayed large above content */}
+          <h2 className="text-2xl font-bold text-zinc-100 mb-1 leading-snug">
+            {note.title || "Untitled"}
+          </h2>
+
+          {/* Meta row */}
+          <div className="flex items-center gap-3 mb-8">
+            {note.is_pinned ? (
+              <span className="inline-flex items-center gap-1 text-[10px] text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full font-medium">
+                <Pin size={9} className="fill-blue-400" /> Pinned
+              </span>
+            ) : null}
+            {note.is_favorite ? (
+              <span className="inline-flex items-center gap-1 text-[10px] text-yellow-400 bg-yellow-500/10 px-2 py-0.5 rounded-full font-medium">
+                <Star size={9} className="fill-yellow-400" /> Favorite
+              </span>
+            ) : null}
+            {note.created_at && (
+              <span className="text-[11px] text-zinc-700">
+                {new Date(note.created_at).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </span>
+            )}
+          </div>
+
+          {/* Divider */}
+          <div className="h-px bg-white/[0.05] mb-8" />
+
+          {/* Editor */}
           <EditorContent
             editor={editor}
             spellCheck
-            className="
-              prose
-              prose-zinc
-              max-w-none
-              focus:outline-none
+            className="prose prose-invert prose-zinc max-w-none focus:outline-none
+              prose-headings:text-zinc-100 prose-headings:font-semibold
+              prose-p:text-zinc-400 prose-p:leading-relaxed
+              prose-strong:text-zinc-200
+              prose-code:text-blue-300 prose-code:bg-blue-500/10 prose-code:px-1 prose-code:rounded
+              prose-blockquote:border-blue-500/40 prose-blockquote:text-zinc-500
+              prose-a:text-blue-400 prose-a:no-underline hover:prose-a:underline
+              prose-hr:border-white/[0.06]
             "
           />
         </div>
       </main>
+
+      {/* ── FAB ── */}
       <CreateFab
         title="Edit"
-        icon={<Pencil size={18} />}
+        icon={<Pencil size={16} />}
         onClick={() => navigate(`/edit/note/${note.id}`)}
+      />
+
+      <ContextMenu
+        {...menu}
+        items={items}
+        onClose={() => setMenu((prev) => ({ ...prev, visible: false }))}
       />
     </div>
   );
