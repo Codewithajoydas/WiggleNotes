@@ -2,7 +2,7 @@
   "name": "wiggle-note",
   "productName": "WiggleNote",
   "private": true,
-  "version": "0.0.3",
+  "version": "0.0.5",
   "type": "module",
   "main": "electron/main.js",
   "scripts": {
@@ -12,6 +12,22 @@
     "preview": "vite preview",
     "start": "electron .",
     "release": "standard-version"
+  },
+  "build": {
+    "appId": "com.wigglenote.app",
+    "productName": "WiggleNote",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "public/icon.ico"
+    }
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.2.9",

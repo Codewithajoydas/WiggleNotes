@@ -39,7 +39,7 @@ export default function ContextMenu({ x, y, visible, onClose, items }) {
 
       <div
         ref={menuRef}
-        className="fixed z-50 min-w-55 max-h-125 overflow-hidden overflow-y-auto rounded-xl border border-zinc-800 bg-zinc-900 shadow-xl"
+        className="fixed z-50 min-w-fit max-h-125 overflow-hidden overflow-y-auto rounded-xl border border-zinc-800 bg-zinc-900/50 backdrop-blur-xl shadow-xl"
         style={{
           top: posY,
           left: posX,
@@ -56,7 +56,7 @@ export default function ContextMenu({ x, y, visible, onClose, items }) {
                 item.action();
                 onClose();
               }}
-              className={`flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm hover:bg-zinc-950 ${
+              className={`flex w-full items-center gap-3 px-3 py-2 text-left text-[12px] hover:bg-zinc-950 ${
                 item.danger ? "text-red-500" : ""
               } disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-zinc-900`}
             >

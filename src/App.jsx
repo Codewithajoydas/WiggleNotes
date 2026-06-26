@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { HashRouter, Routes, Route, useLocation } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import Home from "./Home";
 import CreateFab from "./components/createFab";
@@ -22,7 +22,7 @@ function App() {
     return null;
   }
   return (
-    <BrowserRouter>
+    <HashRouter>
       <RouteTracker />
       <RestoreRoute />
       <div className="flex h-screen bg-zinc-900 text-zinc-50">
@@ -40,7 +40,7 @@ function App() {
           </Routes>
         </main>
       </div>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 

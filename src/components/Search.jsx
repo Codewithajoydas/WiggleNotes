@@ -1,10 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  Search as SearchIcon,
-  FileText,
-  X,
-  Command,
-} from "lucide-react";
+import { Search as SearchIcon, FileText, X, Command } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import readNote from "../services/notebook/readNote.services";
 
@@ -79,12 +74,12 @@ export default function SearchBar({ open, onClose }) {
   return (
     <div
       className="
-        fixed inset-0 z-50
+        fixed inset-0
         bg-black/50
         backdrop-blur-sm
         flex items-start justify-center
         pt-24
-        z-51
+        z-1000
       "
       onClick={onClose}
     >
@@ -95,7 +90,8 @@ export default function SearchBar({ open, onClose }) {
           max-w-3xl
           overflow-hidden
           rounded-2xl
-          bg-zinc-900
+          bg-zinc-900/60
+          backdrop-blur-2xl
           border
           border-zinc-800
           shadow-[0_20px_80px_rgba(0,0,0,0.5)]
@@ -105,10 +101,7 @@ export default function SearchBar({ open, onClose }) {
         {/* Search Header */}
         <div className="border-b border-zinc-800">
           <div className="flex items-center gap-3 px-5 py-4">
-            <SearchIcon
-              size={20}
-              className="text-zinc-500 flex-shrink-0"
-            />
+            <SearchIcon size={20} className="text-zinc-500 flex-shrink-0" />
 
             <input
               autoFocus
@@ -120,11 +113,10 @@ export default function SearchBar({ open, onClose }) {
                 flex-1
                 bg-transparent
                 outline-none
-
+text-sm
                 text-zinc-100
                 placeholder:text-zinc-500
 
-                text-base
               "
             />
 
@@ -132,11 +124,8 @@ export default function SearchBar({ open, onClose }) {
               className="
                 hidden sm:flex
                 items-center gap-1
-
                 px-2 py-1
-
                 rounded-md
-
                 bg-zinc-800
                 text-zinc-400
 
@@ -204,19 +193,12 @@ export default function SearchBar({ open, onClose }) {
                   justify-center
                 "
               >
-                <SearchIcon
-                  size={24}
-                  className="text-zinc-500"
-                />
+                <SearchIcon size={24} className="text-zinc-500" />
               </div>
 
-              <h3 className="mt-4 font-medium text-zinc-200">
-                No notes found
-              </h3>
+              <h3 className="mt-4 font-medium text-zinc-200">No notes found</h3>
 
-              <p className="mt-1 text-sm text-zinc-500">
-                Try another keyword
-              </p>
+              <p className="mt-1 text-sm text-zinc-500">Try another keyword</p>
             </div>
           ) : (
             filteredNotes.map((note) => {
@@ -245,7 +227,7 @@ export default function SearchBar({ open, onClose }) {
                     gap-4
 
                     px-5
-                    py-4
+                    py-3
 
                     text-left
 
@@ -253,19 +235,20 @@ export default function SearchBar({ open, onClose }) {
                     border-zinc-800
 
                     hover:bg-zinc-800/60
-
+group
                     transition-colors
                   "
                 >
                   <div
                     className="
-                      h-10
-                      w-10
+                      h-7
+                      w-7
 
-                      rounded-xl
+                      rounded-md
 
                       bg-zinc-800
-
+                  group-hover:bg-blue-900/20
+                  transition
                       flex
                       items-center
                       justify-center
@@ -273,10 +256,7 @@ export default function SearchBar({ open, onClose }) {
                       flex-shrink-0
                     "
                   >
-                    <FileText
-                      size={18}
-                      className="text-zinc-400"
-                    />
+                    <FileText size={15} className="text-zinc-400 group-hover:text-blue-600" />
                   </div>
 
                   <div className="flex-1 min-w-0">
@@ -284,7 +264,7 @@ export default function SearchBar({ open, onClose }) {
                       className="
                         font-medium
                         text-zinc-100
-
+text-sm
                         truncate
                       "
                     >
@@ -295,7 +275,7 @@ export default function SearchBar({ open, onClose }) {
                       className="
                         mt-1
 
-                        text-sm
+                        text-xs
                         text-zinc-400
 
                         line-clamp-2

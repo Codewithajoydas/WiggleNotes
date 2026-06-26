@@ -297,7 +297,11 @@ export default function EditNote() {
         return;
       }
       setTitle(note.title);
-      if (note.cover) setCover(note.cover);
+      if (note.cover_type)
+        setCover({
+          type: note.cover_type,
+          value: note.cover_value,
+        });
       editor?.commands.setContent(JSON.parse(note.content));
     }
     if (editor) loadNote();
@@ -311,7 +315,11 @@ export default function EditNote() {
         return;
       }
       setTitle(note.title);
-      if (note.cover) setCover(note.cover);
+      if (note.cover_type)
+        setCover({
+          type: note?.cover_type,
+          value: note?.cover_value,
+        });
       editor?.commands.setContent(JSON.parse(note.content));
     };
     window.addEventListener("note-updated", refresh);
@@ -344,7 +352,8 @@ export default function EditNote() {
         id,
         title: title.trim() || "Untitled Note",
         content: JSON.stringify(editor.getJSON()),
-        cover: cover || null,
+        cover_type: cover?.type,
+        cover_value: cover?.value,
       });
       setAlert({ type: "success", title: "Saved", message: "Note updated." });
       window.dispatchEvent(new CustomEvent("note-updated"));
@@ -390,10 +399,21 @@ export default function EditNote() {
           {/* Back */}
           <button
             onClick={() => navigate(-1)}
-            className="shrink-0 h-8 w-8 rounded-lg flex items-center justify-center text-zinc-600 hover:text-zinc-300 hover:bg-white/[0.06] transition-all"
-            title="Go back"
+            className="
+                        h-9
+                        w-9
+                        rounded-xl
+                        flex
+                        items-center
+                        justify-center
+                        text-zinc-400
+                        hover:bg-zinc-800
+                        hover:text-blue-400
+                        transition-all
+                        duration-200
+                      "
           >
-            <ArrowLeft size={15} />
+            <ArrowLeft size={18} />
           </button>
 
           {/* Title */}
@@ -666,16 +686,22 @@ export default function EditNote() {
           </ToolbarButton>
         </div>
       </div>
-
-      {/* ── Cover banner ── */}
-      {coverStyle && (
-        <div className="w-full h-36 shrink-0 relative" style={coverStyle}>
-          <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-[#0e0e0e] to-transparent" />
-        </div>
-      )}
-
-      {/* ── Editor ── */}
       <div className="flex-1 overflow-auto">
+        {/* ── Cover banner ── */}
+        {cover && (
+          <div className="w-full h-50 shrink-0 relative" style={coverStyle}>
+            {/* Subtle bottom fade into editor bg */}
+            <input
+              placeholder="Enter title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="absolute bottom-12.5 left-55 bg-transparent z-100 text-[40px]  outline-0 font-bold flex-1 w-full"
+            />
+            <div className="absolute inset-x-0 bottom-0 h-12 bg-linear-to-t from-zinc-950 to-transparent" />
+          </div>
+        )}
+
+        {/* ── Editor ── */}
         <div className="max-w-3xl mx-auto">
           <EditorContent
             editor={editor}

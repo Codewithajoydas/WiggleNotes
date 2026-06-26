@@ -57,6 +57,49 @@ function HeaderAction({ onClick, active, danger, title, children }) {
   );
 }
 
+const Cover = ({ type, value, children }) => {
+  switch (type) {
+    case "image":
+      return (
+        <div
+          className="w-full h-50 shrink-0 relative bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: `url(${value})`,
+          }}
+        >
+          {children}
+        </div>
+      );
+
+    case "gradient":
+      return (
+        <div
+          className="w-full h-50 shrink-0 relative"
+          style={{
+            background: value,
+          }}
+        >
+          {children}
+        </div>
+      );
+
+    case "color":
+      return (
+        <div
+          className="w-full h-50 shrink-0 relative"
+          style={{
+            backgroundColor: value,
+          }}
+        >
+          {children}
+        </div>
+      );
+
+    default:
+      return null;
+  }
+};
+
 export default function ReadNote() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -209,9 +252,9 @@ export default function ReadNote() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-[#0e0e0e] text-zinc-100">
+    <div className="h-screen flex flex-col bg-zinc-950 text-zinc-100">
       {/* ── Header ── */}
-    
+
       <Header>
         {/* Actions */}
         <div className="flex items-center gap-0.5">
@@ -268,46 +311,46 @@ export default function ReadNote() {
         </div>
       </Header>
 
-      {/* ── Cover banner ── */}
-      {coverStyle && (
-        <div className="w-full h-36 shrink-0 relative" style={coverStyle}>
-          <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-[#0e0e0e] to-transparent" />
-        </div>
-      )}
-
       {/* ── Content ── */}
       <main className="flex-1 overflow-auto">
+        {/* ── Cover banner ── */}
+        {note.cover_type && (
+          <Cover type={note.cover_type} value={note.cover_value}>
+            <div className="left-55 absolute bottom-3">
+              <h1 className="text-4xl font-bold text-zinc-100 mb-1 leading-snug">
+                {note.title || "Untitled"}
+              </h1>
+
+              {/* Meta row */}
+              <div className="flex items-center gap-3 mb-8">
+                {note.is_pinned ? (
+                  <span className="inline-flex items-center gap-1 text-[10px] text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full font-medium">
+                    <Pin size={9} className="fill-blue-400" /> Pinned
+                  </span>
+                ) : null}
+                {note.is_favorite ? (
+                  <span className="inline-flex items-center gap-1 text-[10px] text-yellow-400 bg-yellow-500/10 px-2 py-0.5 rounded-full font-medium">
+                    <Star size={9} className="fill-yellow-400" /> Favorite
+                  </span>
+                ) : null}
+                {note.created_at && (
+                  <span className="text-[11px] text-zinc-300">
+                    {new Date(note.created_at).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="absolute inset-x-0 bottom-0 h-16 bg-linear-to-t from-zinc-950 to-transparent" />
+          </Cover>
+        )}
+
         <div className="max-w-3xl mx-auto px-8 py-8">
           {/* Note title displayed large above content */}
-          <h2 className="text-2xl font-bold text-zinc-100 mb-1 leading-snug">
-            {note.title || "Untitled"}
-          </h2>
-
-          {/* Meta row */}
-          <div className="flex items-center gap-3 mb-8">
-            {note.is_pinned ? (
-              <span className="inline-flex items-center gap-1 text-[10px] text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full font-medium">
-                <Pin size={9} className="fill-blue-400" /> Pinned
-              </span>
-            ) : null}
-            {note.is_favorite ? (
-              <span className="inline-flex items-center gap-1 text-[10px] text-yellow-400 bg-yellow-500/10 px-2 py-0.5 rounded-full font-medium">
-                <Star size={9} className="fill-yellow-400" /> Favorite
-              </span>
-            ) : null}
-            {note.created_at && (
-              <span className="text-[11px] text-zinc-700">
-                {new Date(note.created_at).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                })}
-              </span>
-            )}
-          </div>
-
-          {/* Divider */}
-          <div className="h-px bg-white/[0.05] mb-8" />
 
           {/* Editor */}
           <EditorContent

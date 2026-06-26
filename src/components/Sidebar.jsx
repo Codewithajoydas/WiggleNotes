@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import logo from "../../public/wigglenote_logo.svg";
+
 import {
   Search,
   FilePlus,
@@ -249,21 +251,19 @@ export default function Sidebar() {
       >
         {/* ── Brand header ── */}
         <div className="flex items-center gap-2.5 px-4 h-14 border-b border-white/[0.06] shrink-0">
-          <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center shrink-0">
-            <img
-              src="/wigglenote_logo.svg"
-              alt=""
-              className="w-4 h-4 invert"
-              onError={(e) => {
-                e.target.style.display = "none";
-                e.target.parentElement.innerHTML =
-                  '<span class="text-white text-xs font-bold">W</span>';
-              }}
-            />
-          </div>
+          <img
+            src={logo}
+            alt=""
+            className="w-[40px] h-[40px] "
+            onError={(e) => {
+              e.target.style.display = "none";
+              e.target.parentElement.innerHTML =
+                '<span class="text-white text-xs font-bold">W</span>';
+            }}
+          />
           <div className="min-w-0">
             <p className="text-sm font-semibold text-white tracking-tight leading-none">
-              Wigglenote
+              WiggleNote
             </p>
             <p className="text-[10px] text-zinc-600 mt-0.5 leading-none">
               Personal workspace
@@ -395,24 +395,19 @@ export default function Sidebar() {
         </div>
 
         {/* ── Footer ── */}
-        <div className="shrink-0 border-t border-white/[0.06] px-2 py-2">
+        <div className="shrink-0 border-t border-white/6 px-2 py-2">
           <SideNavLink to="/settings" icon={<Settings size={15} />}>
             Settings
           </SideNavLink>
         </div>
       </aside>
 
-      <ContextMenu
-        {...menu}
-        items={items}
-        onClose={() => setMenu((prev) => ({ ...prev, visible: false }))}
-      />
       <SearchBar open={searchOpen} onClose={() => setSearchOpen(false)} />
 
       {/* ── Rename modal ── */}
       {renameOpen && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-[#161616] border border-white/[0.08] rounded-2xl p-5 w-80 shadow-2xl">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-500">
+          <div className="bg-zinc-900/90 backdrop-blur-sm border border-white/8 rounded-2xl p-5 w-80 shadow-2xl">
             <h2 className="text-sm font-semibold text-zinc-100 mb-1">
               Rename note
             </h2>
@@ -444,6 +439,11 @@ export default function Sidebar() {
           </div>
         </div>
       )}
+      <ContextMenu
+        {...menu}
+        items={items}
+        onClose={() => setMenu((prev) => ({ ...prev, visible: false }))}
+      />
     </>
   );
 }

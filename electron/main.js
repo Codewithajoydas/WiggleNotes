@@ -19,7 +19,7 @@ function createWindow() {
     titleBarOverlay: {
       color: "#09090b",
       symbolColor: "#f4f4f5",
-      height: 63,
+      height: 60,
     },
 
     webPreferences: {
@@ -29,23 +29,21 @@ function createWindow() {
       spellcheck: true,
     },
   });
-  win.webContents.openDevTools()
 
   const dbPath = path.join(app.getPath("userData"), "notebook.db");
-  console.log(dbPath);
   db = new Database(dbPath);
+
   db.prepare(`
     CREATE TABLE IF NOT EXISTS notes (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-
       title TEXT NOT NULL DEFAULT '',
       content TEXT NOT NULL DEFAULT '',
-
       is_pinned INTEGER NOT NULL DEFAULT 0,
       is_favorite INTEGER NOT NULL DEFAULT 0,
       is_archived INTEGER NOT NULL DEFAULT 0,
       is_deleted INTEGER NOT NULL DEFAULT 0,
-
+      cover_type TEXT DEFAULT NULL,
+      cover_value TEXT DEFAULT NULL,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       deleted_at DATETIME DEFAULT NULL
@@ -81,9 +79,12 @@ function createWindow() {
     menu.popup();
   });
 
-  win.loadURL("http://localhost:5173");
-
-  // win.webContents.openDevTools();
+  if (app.isPackaged) {
+    win.loadURL(path.join(__dirname, "../dist/index.html"));
+  } else {
+    win.loadURL("http://localhost:5173");
+    win.webContents.openDevTools();
+  }
 }
 
 app.whenReady().then(createWindow);
@@ -96,21 +97,28 @@ app.whenReady().then(createWindow);
 
 ipcMain.handle("create-note", (event, note) => {
   const stmt = db.prepare(`
-    INSERT INTO notes (title, content)
-    VALUES (?, ?)
+    INSERT INTO notes (
+      title,
+      content,
+      cover_type,
+      cover_value
+    )
+    VALUES (?, ?, ?, ?)
   `);
 
   const result = stmt.run(
-    note?.title || "Untitled",
-    note?.content || ""
+    note?.title ?? "Untitled",
+    note?.content ?? "",
+    note?.cover_type ?? null,
+    note?.cover_value ?? null
   );
 
   return {
     success: true,
     id: result.lastInsertRowid,
+    result
   };
 });
-
 
 
 /* -------------------------------------------------------------------------- */
@@ -207,6 +215,8 @@ ipcMain.handle("update-note", (event, note) => {
     SET
       title = ?,
       content = ?,
+      cover_type = ?,
+      cover_value = ?,
       updated_at = CURRENT_TIMESTAMP
     WHERE id = ?
   `);
@@ -214,12 +224,15 @@ ipcMain.handle("update-note", (event, note) => {
   const result = stmt.run(
     note.title,
     note.content,
+    note.cover_type,
+    note.cover_value,
     note.id
   );
 
   return {
     success: true,
     changes: result.changes,
+    result
   };
 });
 

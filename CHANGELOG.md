@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.5](https://github.com/Codewithajoydas/WiggleNotes/compare/v0.0.4...v0.0.5) (2026-06-26)
+
+
+### Features
+
+* Add Notebook Cover Image ([cda7154](https://github.com/Codewithajoydas/WiggleNotes/commit/cda7154de4712f72fce051a515d87a44d41156d6))
+
+### [0.0.4](https://github.com/Codewithajoydas/WiggleNotes/compare/v0.0.3...v0.0.4) (2026-06-26)
+
 ### [0.0.3](https://github.com/Codewithajoydas/WiggleNotes/compare/v0.0.2...v0.0.3) (2026-06-25)
 
 

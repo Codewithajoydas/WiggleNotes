@@ -69,7 +69,8 @@ useEffect(() => {
         fixed flex gap-4 rounded-xl
         border ${style.border}
         ${style.bg}
-        p-4
+        p-2
+        
         w-fit
         bottom-2
         right-3
@@ -91,10 +92,10 @@ useEffect(() => {
       </div>
 
       <div className="flex-1">
-        {title && <h3 className={`font-semibold ${style.title}`}>{title}</h3>}
+        {title && <h3 className={`font-semibold ${style.title} text-sm`}>{title}</h3>}
 
         {message && (
-          <p className="mt-1 text-sm text-zinc-300 leading-relaxed">
+          <p className="mt-1 text-[10px] text-zinc-300 leading-relaxed">
             {message}
           </p>
         )}
@@ -105,7 +106,7 @@ useEffect(() => {
           onClick={onClose}
           className="text-zinc-500 hover:text-white transition"
         >
-          <X size={18} />
+          <X size={15} />
         </button>
       )}
     </div>

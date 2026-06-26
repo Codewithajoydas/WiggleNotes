@@ -42,10 +42,12 @@ import {
   Upload,
   Sun,
   Layers,
+  ArrowLeft,
 } from "lucide-react";
 import CreateFab from "../components/createFab";
 import createNote from "../services/notebook/createNote.services";
 import Alert from "../components/ui/alert";
+import { useNavigate } from "react-router-dom";
 
 // ─── Cover Presets ────────────────────────────────────────────────────────────
 const SOLID_COLORS = [
@@ -272,6 +274,7 @@ function Divider() {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function CreateNote() {
+  const navigate = useNavigate();
   const imageInputRef = useRef(null);
   const coverImageInputRef = useRef(null);
   const [editable, setEditable] = useState(true);
@@ -335,7 +338,8 @@ export default function CreateNote() {
       const note = {
         title: title.trim() || "Untitled Note",
         content: JSON.stringify(editor.getJSON()),
-        cover: cover || null,
+        cover_type: cover.type || null,
+        cover_value: cover.value || null,
       };
       await createNote(note);
       setAlert({
@@ -388,13 +392,31 @@ export default function CreateNote() {
       <div className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-xl border-b border-zinc-900">
         {/* Top row: title + meta actions */}
         <div className="flex items-center gap-2 px-4 pt-3 pb-1 pr-[150px]">
+          <button
+                     onClick={() => navigate(-1)}
+                     className="
+                       h-9
+                       w-9
+                       rounded-xl
+                       flex
+                       items-center
+                       justify-center
+                       text-zinc-400
+                       hover:bg-zinc-800
+                       hover:text-blue-400
+                       transition-all
+                       duration-200
+                     "
+                   >
+                     <ArrowLeft size={18} />
+                   </button>
           <input
             type="text"
             value={title}
             placeholder="Untitled Note"
             onChange={(e) => setTitle(e.target.value)}
             disabled={!editable}
-            className="flex-1 min-w-0 text-base font-semibold bg-transparent text-zinc-100 placeholder:text-zinc-600 outline-none"
+            className="flex-1 min-w-0 text-base font-semibold bg-transparent text-zinc-100 placeholder:text-zinc-600 outline-none w-full "
           />
           <div className="flex items-center gap-1 shrink-0">
             {/* Cover settings */}
@@ -663,21 +685,29 @@ export default function CreateNote() {
       </div>
 
       {/* ── Cover Banner ── */}
-      {cover && (
-        <div className="w-full h-36 shrink-0 relative" style={coverStyle}>
-          {/* Subtle bottom fade into editor bg */}
-          <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-zinc-950 to-transparent" />
-        </div>
-      )}
+      <div className="editor overflow-auto flex-1">
+        {cover && (
+          <div className="w-full h-50 shrink-0 relative" style={coverStyle}>
+            {/* Subtle bottom fade into editor bg */}
+            <input
+              placeholder="Enter title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="absolute bottom-12.5 left-55 bg-transparent z-100 text-[40px]  outline-0 font-bold flex-1 w-full"
+            />
+            <div className="absolute inset-x-0 bottom-0 h-12 bg-linear-to-t from-zinc-950 to-transparent" />
+          </div>
+        )}
 
-      {/* ── Editor ── */}
-      <div className="flex-1 overflow-auto">
-        <div className="max-w-3xl mx-auto">
-          <EditorContent
-            editor={editor}
-            spellCheck
-            className="px-8 py-6 focus:outline-none"
-          />
+        {/* ── Editor ── */}
+        <div className="flex-1 ">
+          <div className="max-w-3xl mx-auto">
+            <EditorContent
+              editor={editor}
+              spellCheck
+              className="px-8 py-6 focus:outline-none"
+            />
+          </div>
         </div>
       </div>
 
