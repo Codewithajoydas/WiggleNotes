@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.7](https://github.com/Codewithajoydas/WiggleNotes/compare/v0.0.6...v0.0.7) (2026-06-27)
+
+
+### Features
+
+* ContextMenu Add for Fav and Trash Page ([249c309](https://github.com/Codewithajoydas/WiggleNotes/commit/249c30946d4a3ad848b4f7b3e179ae98a81f0ee4))
+
 ### [0.0.6](https://github.com/Codewithajoydas/WiggleNotes/compare/v0.0.3...v0.0.6) (2026-06-26)
 
 
