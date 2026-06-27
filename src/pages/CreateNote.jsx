@@ -48,224 +48,9 @@ import CreateFab from "../components/createFab";
 import createNote from "../services/notebook/createNote.services";
 import Alert from "../components/ui/alert";
 import { useNavigate } from "react-router-dom";
-
-// ─── Cover Presets ────────────────────────────────────────────────────────────
-const SOLID_COLORS = [
-  { label: "Slate", value: "#1e293b" },
-  { label: "Midnight", value: "#0f172a" },
-  { label: "Stone", value: "#292524" },
-  { label: "Forest", value: "#14532d" },
-  { label: "Navy", value: "#1e3a5f" },
-  { label: "Plum", value: "#3b1f5e" },
-  { label: "Rose", value: "#4c1130" },
-  { label: "Rust", value: "#431407" },
-];
-
-const GRADIENTS = [
-  {
-    label: "Dusk",
-    value: "linear-gradient(135deg, #0f0c29, #302b63, #24243e)",
-  },
-  {
-    label: "Aurora",
-    value: "linear-gradient(135deg, #0f2027, #203a43, #2c5364)",
-  },
-  {
-    label: "Ember",
-    value: "linear-gradient(135deg, #1a0533, #6b21a8, #db2777)",
-  },
-  {
-    label: "Forest",
-    value: "linear-gradient(135deg, #134e4a, #065f46, #166534)",
-  },
-  {
-    label: "Sand",
-    value: "linear-gradient(135deg, #451a03, #92400e, #d97706)",
-  },
-  {
-    label: "Night",
-    value: "linear-gradient(135deg, #020617, #0f172a, #1e1b4b)",
-  },
-];
-
-// ─── Cover Settings Panel ─────────────────────────────────────────────────────
-function CoverPanel({ cover, onChange, onClose, imageInputRef }) {
-  const [tab, setTab] = useState("gradient");
-
-  return (
-    <div className="absolute top-14 right-4 z-50 w-80 rounded-2xl bg-zinc-900 border border-zinc-800 shadow-2xl shadow-black/60 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
-        <span className="text-sm font-semibold text-zinc-100 tracking-wide">
-          Cover Settings
-        </span>
-        <button
-          onClick={onClose}
-          className="text-zinc-500 hover:text-zinc-300 transition-colors"
-        >
-          <X size={16} />
-        </button>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex border-b border-zinc-800">
-        {[
-          { id: "gradient", icon: <Layers size={13} />, label: "Gradient" },
-          { id: "solid", icon: <Sun size={13} />, label: "Solid" },
-          { id: "image", icon: <ImageIcon size={13} />, label: "Image" },
-        ].map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium transition-colors ${
-              tab === t.id
-                ? "text-blue-400 border-b-2 border-blue-500"
-                : "text-zinc-500 hover:text-zinc-300"
-            }`}
-          >
-            {t.icon}
-            {t.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="p-4">
-        {/* Gradient tab */}
-        {tab === "gradient" && (
-          <div className="grid grid-cols-3 gap-2">
-            {GRADIENTS.map((g) => (
-              <button
-                key={g.label}
-                onClick={() => onChange({ type: "gradient", value: g.value })}
-                className={`relative h-14 rounded-xl overflow-hidden ring-2 transition-all ${
-                  cover?.value === g.value
-                    ? "ring-blue-500 scale-95"
-                    : "ring-transparent hover:ring-zinc-600"
-                }`}
-                style={{ background: g.value }}
-                title={g.label}
-              >
-                <span className="absolute inset-x-0 bottom-0 pb-1 text-[10px] text-white/70 text-center font-medium">
-                  {g.label}
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Solid tab */}
-        {tab === "solid" && (
-          <div className="grid grid-cols-4 gap-2">
-            {SOLID_COLORS.map((c) => (
-              <button
-                key={c.label}
-                onClick={() => onChange({ type: "solid", value: c.value })}
-                className={`h-12 rounded-xl ring-2 transition-all ${
-                  cover?.value === c.value
-                    ? "ring-blue-500 scale-95"
-                    : "ring-transparent hover:ring-zinc-600"
-                }`}
-                style={{ background: c.value }}
-                title={c.label}
-              />
-            ))}
-            {/* Custom color picker */}
-            <label
-              className="h-12 rounded-xl ring-2 ring-transparent hover:ring-zinc-600 flex items-center justify-center cursor-pointer bg-zinc-800 transition-all"
-              title="Custom color"
-            >
-              <Palette size={16} className="text-zinc-400" />
-              <input
-                type="color"
-                className="sr-only"
-                onChange={(e) =>
-                  onChange({ type: "solid", value: e.target.value })
-                }
-              />
-            </label>
-          </div>
-        )}
-
-        {/* Image tab */}
-        {tab === "image" && (
-          <div className="space-y-3">
-            {cover?.type === "image" && (
-              <div
-                className="h-24 rounded-xl bg-cover bg-center ring-1 ring-zinc-700"
-                style={{ backgroundImage: `url(${cover.value})` }}
-              />
-            )}
-            <button
-              onClick={() => imageInputRef.current?.click()}
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm font-medium transition-colors border border-zinc-700"
-            >
-              <Upload size={15} />
-              Upload image
-            </button>
-            <p className="text-[11px] text-zinc-600 text-center">
-              Recommended: 1500 × 400px
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Remove cover */}
-      {cover && (
-        <div className="px-4 pb-4">
-          <button
-            onClick={() => onChange(null)}
-            className="w-full py-2 rounded-xl text-xs text-zinc-500 hover:text-red-400 hover:bg-zinc-800 transition-colors border border-zinc-800"
-          >
-            Remove cover
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Toolbar Button ───────────────────────────────────────────────────────────
-function ToolbarButton({
-  onClick,
-  active = false,
-  disabled = false,
-  label,
-  children,
-}) {
-  return (
-    <button
-      type="button"
-      disabled={disabled}
-      title={label}
-      onMouseDown={(e) => {
-        e.preventDefault();
-        if (!disabled) onClick?.();
-      }}
-      className={`
-        group relative shrink-0 flex flex-col items-center justify-center gap-0.5
-        h-11 w-11 rounded-xl transition-all duration-150 select-none
-        ${
-          disabled
-            ? "opacity-30 cursor-not-allowed"
-            : active
-              ? "bg-blue-500/20 text-blue-400"
-              : "text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
-        }
-      `}
-    >
-      {children}
-      {label && (
-        <span
-          className={`text-[9px] leading-none font-medium tracking-wide uppercase ${
-            active ? "text-blue-400" : "text-zinc-600 group-hover:text-zinc-400"
-          }`}
-        >
-          {label}
-        </span>
-      )}
-    </button>
-  );
-}
+import { unsplash } from "../api/unsplash";
+import { CoverPanel } from "../components/CoverPanel";
+import ToolbarButton from "../components/ui/toolbarButton";
 
 // ─── Toolbar Divider ──────────────────────────────────────────────────────────
 function Divider() {
@@ -275,8 +60,8 @@ function Divider() {
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function CreateNote() {
   const navigate = useNavigate();
-  const imageInputRef = useRef(null);
   const coverImageInputRef = useRef(null);
+  const imageInputRef = useRef(null);
   const [editable, setEditable] = useState(true);
   const [alert, setAlert] = useState(null);
   const [title, setTitle] = useState("Untitled Note");
@@ -305,15 +90,6 @@ export default function CreateNote() {
     content: ``,
   });
 
-  // Cover image upload
-  const handleCoverImageUpload = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const url = URL.createObjectURL(file);
-    setCover({ type: "image", value: url });
-    e.target.value = "";
-  };
-
   // Editor image upload
   const handleImageUpload = (e) => {
     const file = e.target.files?.[0];
@@ -323,7 +99,6 @@ export default function CreateNote() {
     e.target.value = "";
   };
 
-  // Save
   const handleSubmit = useCallback(async () => {
     if (!editor) return;
     if (editor.isEmpty) {
@@ -393,8 +168,8 @@ export default function CreateNote() {
         {/* Top row: title + meta actions */}
         <div className="flex items-center gap-2 px-4 pt-3 pb-1 pr-[150px]">
           <button
-                     onClick={() => navigate(-1)}
-                     className="
+            onClick={() => navigate(-1)}
+            className="
                        h-9
                        w-9
                        rounded-xl
@@ -407,9 +182,9 @@ export default function CreateNote() {
                        transition-all
                        duration-200
                      "
-                   >
-                     <ArrowLeft size={18} />
-                   </button>
+          >
+            <ArrowLeft size={18} />
+          </button>
           <input
             type="text"
             value={title}
@@ -424,7 +199,9 @@ export default function CreateNote() {
               <ToolbarButton
                 label="Cover"
                 active={showCoverPanel}
-                onClick={() => setShowCoverPanel((v) => !v)}
+                onClick={() => {
+                  setShowCoverPanel((v) => !v);
+                }}
               >
                 <Palette size={16} />
               </ToolbarButton>
@@ -685,7 +462,7 @@ export default function CreateNote() {
       </div>
 
       {/* ── Cover Banner ── */}
-      <div className="editor overflow-auto flex-1">
+      <div className="editor overflow-y-auto overflow-x-hidden flex-1">
         {cover && (
           <div className="w-full h-50 shrink-0 relative" style={coverStyle}>
             {/* Subtle bottom fade into editor bg */}
@@ -693,7 +470,7 @@ export default function CreateNote() {
               placeholder="Enter title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="absolute bottom-12.5 left-55 bg-transparent z-100 text-[40px]  outline-0 font-bold flex-1 w-full"
+              className="absolute bottom-12.5 left-55 bg-transparent z-1 text-[40px]  outline-0 font-bold flex-1 w-full"
             />
             <div className="absolute inset-x-0 bottom-0 h-12 bg-linear-to-t from-zinc-950 to-transparent" />
           </div>
@@ -718,13 +495,6 @@ export default function CreateNote() {
         accept="image/*"
         className="hidden"
         onChange={handleImageUpload}
-      />
-      <input
-        ref={coverImageInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleCoverImageUpload}
       />
 
       <CreateFab title="save" onClick={handleSubmit} />

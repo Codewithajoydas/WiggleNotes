@@ -31,7 +31,7 @@ export default function ContextMenu({ x, y, visible, onClose, items }) {
 
   const posY =
     y + MENU_HEIGHT > window.innerHeight
-      ? window.innerHeight - MENU_HEIGHT - 80
+      ? window.innerHeight - MENU_HEIGHT
       : y;
   return (
     <>
