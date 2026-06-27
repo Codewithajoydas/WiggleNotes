@@ -1,10 +1,11 @@
 import { useEffect, useRef } from "react";
 
-export default function ContextMenu({ x, y, visible, onClose, items }) {
+export default function ContextMenu({ x, y, visible, onClose, items, h }) {
   const menuRef = useRef(null);
-
   useEffect(() => {
     if (!visible) return;
+
+    document.body.style.pointerEvents = "none";
 
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -15,6 +16,7 @@ export default function ContextMenu({ x, y, visible, onClose, items }) {
     document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
+      document.body.style.pointerEvents = "";
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [visible, onClose]);
@@ -22,25 +24,23 @@ export default function ContextMenu({ x, y, visible, onClose, items }) {
   if (!visible) return null;
 
   const MENU_WIDTH = 220;
-  const MENU_HEIGHT = 500; // approximate
+  const MENU_HEIGHT = h || 500; // approximate
 
   const posX =
-    x + MENU_WIDTH > window.innerWidth
-      ? window.innerWidth - MENU_WIDTH 
-      : x;
+    x + MENU_WIDTH > window.innerWidth ? window.innerWidth - MENU_WIDTH : x;
 
   const posY =
-    y + MENU_HEIGHT > window.innerHeight
-      ? window.innerHeight - MENU_HEIGHT
-      : y;
+    y + MENU_HEIGHT > window.innerHeight ? window.innerHeight - MENU_HEIGHT : y;
   return (
     <>
       <div className="fixed  z-40" onClick={onClose} />
 
       <div
+        onContextMenu={(e) => e.stopPropagation()}
         ref={menuRef}
         className="fixed z-50 min-w-fit max-h-125 overflow-hidden overflow-y-auto rounded-xl border border-zinc-800 bg-zinc-900/50 backdrop-blur-xl shadow-xl"
         style={{
+          pointerEvents: "auto",
           top: posY,
           left: posX,
         }}

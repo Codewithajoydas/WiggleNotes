@@ -51,6 +51,8 @@ import { useNavigate } from "react-router-dom";
 import { unsplash } from "../api/unsplash";
 import { CoverPanel } from "../components/CoverPanel";
 import ToolbarButton from "../components/ui/toolbarButton";
+import updateNote from "../services/notebook/updateNote.services";
+import checkSaved from "../services/notebook/checkSaved";
 
 // ─── Toolbar Divider ──────────────────────────────────────────────────────────
 function Divider() {
@@ -60,6 +62,8 @@ function Divider() {
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function CreateNote() {
   const navigate = useNavigate();
+  const [noteId, setNoteId] = useState(null);
+  const saveTimeout = useRef(null);
   const coverImageInputRef = useRef(null);
   const imageInputRef = useRef(null);
   const [editable, setEditable] = useState(true);
@@ -67,6 +71,7 @@ export default function CreateNote() {
   const [title, setTitle] = useState("Untitled Note");
   const [cover, setCover] = useState(null); // { type: 'solid'|'gradient'|'image', value: string }
   const [showCoverPanel, setShowCoverPanel] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -80,6 +85,7 @@ export default function CreateNote() {
       TaskList,
       TaskItem.configure({ nested: true }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
+      
       Placeholder.configure({
         placeholder: ({ node }) =>
           node.type.name === "heading"
@@ -90,63 +96,147 @@ export default function CreateNote() {
     content: ``,
   });
 
-  // Editor image upload
+  // Upload image
   const handleImageUpload = (e) => {
     const file = e.target.files?.[0];
     if (!file || !editor) return;
+
     const url = URL.createObjectURL(file);
     editor.chain().focus().setImage({ src: url }).run();
+
     e.target.value = "";
   };
 
+  // Create note (runs only once)
   const handleSubmit = useCallback(async () => {
     if (!editor) return;
-    if (editor.isEmpty) {
-      setAlert({
-        type: "error",
-        title: "Error",
-        message: "Note cannot be empty.",
-      });
-      return;
-    }
+    if (noteId) return;
+    if (editor.isEmpty) return;
+
     try {
       const note = {
         title: title.trim() || "Untitled Note",
         content: JSON.stringify(editor.getJSON()),
-        cover_type: cover.type || null,
-        cover_value: cover.value || null,
+        cover_type: cover?.type ?? null,
+        cover_value: cover?.value ?? null,
       };
-      await createNote(note);
+
+      const result = await createNote(note);
+      setNoteId(result.id);
+      setSaved(true);
+      setAlert({
+        type: "success",
+        title: "Saved",
+        message: "Note created successfully.",
+      });
+      window.dispatchEvent(new CustomEvent("note-updated"));
+    } catch (err) {
+      console.error(err);
+    }
+  }, [editor, noteId, title, cover]);
+
+  // Update existing note
+  const autoSave = useCallback(async () => {
+    if (!editor || !noteId) return;
+
+    try {
+      const note = {
+        title: title.trim() || "Untitled Note",
+        content: JSON.stringify(editor.getJSON()),
+        cover_type: cover?.type ?? null,
+        cover_value: cover?.value ?? null,
+        id: noteId,
+      };
+
+      await updateNote(note);
+      setSaved(true);
       setAlert({
         type: "success",
         title: "Saved",
         message: "Note saved successfully.",
       });
-      editor.commands.clearContent();
-      setTitle("Untitled Note");
-      setCover(null);
-      requestAnimationFrame(() => editor.commands.focus("start"));
       window.dispatchEvent(new CustomEvent("note-updated"));
     } catch (err) {
-      console.error("Failed to save note:", err);
+      console.error("Auto Save Failed:", err);
       setAlert({
         type: "error",
-        title: "Save Failed",
-        message: "Unable to save the note.",
+        title: "Error",
+        message: "Failed to save note.",
       });
     }
-  }, [editor, title, cover]);
+  }, [editor, noteId, title, cover]);
 
+  // Auto save after user stops typing
+  useEffect(() => {
+    if (!editor || !noteId) return;
+
+    const save = () => {
+      clearTimeout(saveTimeout.current);
+
+      saveTimeout.current = setTimeout(() => {
+        autoSave();
+      }, 1000);
+    };
+
+    editor.on("update", save);
+
+    return () => {
+      clearTimeout(saveTimeout.current);
+      editor.off("update", save);
+    };
+  }, [editor, noteId, autoSave]);
+
+  // Auto save when title or cover changes
+  useEffect(() => {
+    if (!noteId) return;
+
+    clearTimeout(saveTimeout.current);
+
+    saveTimeout.current = setTimeout(() => {
+      autoSave();
+    }, 1000);
+
+    return () => clearTimeout(saveTimeout.current);
+  }, [title, cover, noteId, autoSave]);
+
+  // Ctrl + S
   useEffect(() => {
     const handleKeyDown = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
         e.preventDefault();
-        handleSubmit();
+
+        if (noteId) {
+          autoSave();
+        } else {
+          handleSubmit();
+        }
       }
     };
+
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleSubmit]);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [handleSubmit, autoSave, noteId]);
+
+  useEffect(() => {
+    if (!editor) return;
+    const handleUpdate = () => {
+      setSaved(false);
+    };
+    editor.on("update", handleUpdate);
+    return () => {
+      editor.off("update", handleUpdate);
+    };
+  }, [editor]);
+
+  useEffect(() => {
+    if (!editor) return;
+    (async () => {
+      await checkSaved(saved);
+    })();
+  }, [editor, saved]);
 
   if (!editor) return null;
 

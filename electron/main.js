@@ -9,9 +9,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 let db;
-
+let win;
+let IsSaved = true;
 function createWindow() {
-  const win = new BrowserWindow({
+  win = new BrowserWindow({
     width: 1200,
     height: 800,
     icon: path.join(__dirname, "icon.ico"),
@@ -50,9 +51,10 @@ function createWindow() {
     )
   `).run();
 
-  win.menuBarVisible = false;
 
   win.webContents.on("context-menu", (event, params) => {
+    if (!params.misspelledWord) return;
+
     const menu = Menu.buildFromTemplate([
       ...params.dictionarySuggestions.map((suggestion) => ({
         label: suggestion,
@@ -60,31 +62,105 @@ function createWindow() {
           win.webContents.replaceMisspelling(suggestion);
         },
       })),
-
-      ...(params.misspelledWord
-        ? [
-          { type: "separator" },
-          {
-            label: "Add to Dictionary",
-            click: () => {
-              win.webContents.session.addWordToSpellCheckerDictionary(
-                params.misspelledWord
-              );
-            },
-          },
-        ]
-        : []),
+      { type: "separator" },
+      {
+        label: "Add to Dictionary",
+        click: () => {
+          win.webContents.session.addWordToSpellCheckerDictionary(
+            params.misspelledWord
+          );
+        },
+      },
     ]);
 
     menu.popup();
   });
 
   if (app.isPackaged) {
-    win.loadURL(path.join(__dirname, "../dist/index.html"));
+    win.loadFile(path.join(__dirname, "../dist/index.html"));
   } else {
     win.loadURL("http://localhost:5173");
     win.webContents.openDevTools();
   }
+  win.on("close", (event) => {
+    if (!IsSaved) {
+      event.preventDefault();
+      const result = dialog.showMessageBoxSync(win, {
+        type: "warning",
+        buttons: ["Cancel", "Close"],
+        defaultId: 0,
+        cancelId: 0,
+        title: "Unsaved Changes",
+        message: "You have unsaved changes.",
+        detail: "Do you really want to close the application?",
+      });
+
+      if (result === 1) {
+        IsSaved = true;
+        win.close();
+      }
+    }
+  })
+  // ---------------- Disable Browser Shortcuts ----------------
+
+  // win.webContents.on("before-input-event", (event, input) => {
+  //   const key = input.key.toLowerCase();
+
+  //   // Refresh
+  //   if (
+  //     key === "f5" ||
+  //     (input.control && key === "r") ||
+  //     (input.control && input.shift && key === "r")
+  //   ) {
+  //     event.preventDefault();
+  //   }
+
+  //   // DevTools
+  //   if (
+  //     key === "f12" ||
+  //     (input.control && input.shift && key === "i")
+  //   ) {
+  //     event.preventDefault();
+  //   }
+
+  //   // Zoom
+  //   if (
+  //     input.control &&
+  //     (key === "+" || key === "-" || key === "=" || key === "0")
+  //   ) {
+  //     event.preventDefault();
+  //   }
+
+  //   // Browser Back / Forward
+  //   if (
+  //     input.alt &&
+  //     (key === "arrowleft" || key === "arrowright")
+  //   ) {
+  //     event.preventDefault();
+  //   }
+  // });
+
+  // // Disable zoom completely
+  // win.webContents.setZoomFactor(1);
+  // win.webContents.setVisualZoomLevelLimits(1, 1);
+
+  // // Disable navigation
+  // win.webContents.on("will-navigate", (event) => {
+  //   event.preventDefault();
+  // });
+
+  // // Disable drag & drop navigation
+  // win.webContents.on("will-redirect", (event) => {
+  //   event.preventDefault();
+  // });
+
+
+  // // Disable changing page title
+  // win.on("page-title-updated", (event) => {
+  //   event.preventDefault();
+  // });
+
+
 }
 
 app.whenReady().then(createWindow);
@@ -94,6 +170,8 @@ app.whenReady().then(createWindow);
 /* -------------------------------------------------------------------------- */
 /*                                   CREATE                                   */
 /* -------------------------------------------------------------------------- */
+
+
 
 ipcMain.handle("create-note", (event, note) => {
   const stmt = db.prepare(`
@@ -360,9 +438,6 @@ ipcMain.handle("rename-note", (_, id, title) => {
 /* -------------------------------------------------------------------------- */
 
 
-
-
-
 ipcMain.handle("export-pdf", async (_, html, fileName) => {
   const pdfWindow = new BrowserWindow({
     show: false,
@@ -399,6 +474,12 @@ ipcMain.handle("export-pdf", async (_, html, fileName) => {
 
   return filePath;
 });
+
+
+ipcMain.handle("set-unsaved-changes", (_, value) => {
+  IsSaved = value;
+})
+
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {

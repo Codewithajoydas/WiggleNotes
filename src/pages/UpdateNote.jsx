@@ -53,7 +53,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import Alert from "../components/ui/alert";
 import ToolbarButton from "../components/ui/toolbarButton";
 import { CoverPanel } from "../components/CoverPanel";
-
+import checkSaved from "../services/notebook/checkSaved";
 
 function Divider() {
   return <div className="mx-1 h-7 w-px bg-white/[0.06] shrink-0" />;
@@ -70,6 +70,8 @@ export default function EditNote() {
   const [cover, setCover] = useState(null);
   const [showCoverPanel, setShowCoverPanel] = useState(false);
   const [alert, setAlert] = useState(null);
+  const [saved, setSaved] = useState(false);
+  const saveTimeout = useRef(null);
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -158,8 +160,9 @@ export default function EditNote() {
         cover_type: cover?.type,
         cover_value: cover?.value,
       });
+      setSaved(true);
+
       setAlert({ type: "success", title: "Saved", message: "Note updated." });
-      window.dispatchEvent(new CustomEvent("note-updated"));
     } catch (err) {
       console.error(err);
       setAlert({
@@ -169,6 +172,66 @@ export default function EditNote() {
       });
     }
   }, [editor, id, title, cover]);
+
+  // Update existing note
+  const autoSave = useCallback(async () => {
+    if (!editor) return;
+    try {
+      await updateNote({
+        id,
+        title: title.trim() || "Untitled Note",
+        content: JSON.stringify(editor.getJSON()),
+        cover_type: cover?.type,
+        cover_value: cover?.value,
+      });
+      setSaved(true);
+      setAlert({
+        type: "success",
+        title: "Saved",
+        message: "Note saved successfully.",
+      });
+    } catch (err) {
+      console.error("Auto Save Failed:", err);
+      setAlert({
+        type: "error",
+        title: "Error",
+        message: "Failed to save note.",
+      });
+    }
+  }, [editor, title, cover, id]);
+
+  // Auto save after user stops typing
+  useEffect(() => {
+    if (!editor) return;
+
+    const save = () => {
+      clearTimeout(saveTimeout.current);
+
+      saveTimeout.current = setTimeout(() => {
+        autoSave();
+      }, 1000);
+    };
+
+    editor.on("update", save);
+
+    return () => {
+      clearTimeout(saveTimeout.current);
+      editor.off("update", save);
+    };
+  }, [editor, autoSave]);
+
+  // Auto save when title or cover changes
+  useEffect(() => {
+    if (!editor) return;
+
+    clearTimeout(saveTimeout.current);
+
+    saveTimeout.current = setTimeout(() => {
+      autoSave();
+    }, 1000);
+
+    return () => clearTimeout(saveTimeout.current);
+  }, [title, cover, autoSave]);
 
   useEffect(() => {
     const onKey = (e) => {
@@ -180,6 +243,24 @@ export default function EditNote() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [handleSubmit]);
+
+  useEffect(() => {
+    if (!editor) return;
+    const handleUpdate = () => {
+      setSaved(false);
+    };
+    editor.on("update", handleUpdate);
+    return () => {
+      editor.off("update", handleUpdate);
+    };
+  }, [editor]);
+
+  useEffect(() => {
+    if (!editor) return;
+    (async () => {
+      await checkSaved(saved);
+    })();
+  }, [editor, saved]);
 
   if (!editor) return null;
 

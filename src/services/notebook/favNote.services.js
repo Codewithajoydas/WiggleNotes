@@ -1,7 +1,6 @@
 const favNote = async (id) => {
   try {
     const result = await window.dbAPI.toggleFavorite(id);
-    console.log("Note retrieved:", result);
     return result;
   } catch (error) {
     console.error("Failed to retrieve note:", error);

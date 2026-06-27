@@ -34,6 +34,9 @@ import favNote from "../services/notebook/favNote.services";
 import pinNote from "../services/notebook/pinNote.services";
 import ContextMenu from "../components/contextMenu";
 import Header from "../components/Header";
+import { generateHTML } from "@tiptap/html";
+import exportPdf from "../services/notebook/downloadPDFNote";
+import TurndownService from "turndown";
 
 // ─── Icon button used in the header bar ──────────────────────────────────────
 function HeaderAction({ onClick, active, danger, title, children }) {
@@ -101,6 +104,8 @@ const Cover = ({ type, value, children }) => {
 };
 
 export default function ReadNote() {
+    const turndown = new TurndownService();
+  
   const navigate = useNavigate();
   const { id } = useParams();
   const [note, setNote] = useState(null);
@@ -192,8 +197,7 @@ export default function ReadNote() {
       icon: <Edit size={15} />,
       action: () => navigate(`/edit/note/${note.id}`),
     },
-    { separator: true },
-    { label: "Rename", icon: <PenLine size={15} />, action: () => {} },
+    
     {
       label: "Move to folder",
       icon: <FolderInput size={15} />,
@@ -215,9 +219,48 @@ export default function ReadNote() {
     {
       label: "Export as Markdown",
       icon: <FileCode2 size={15} />,
-      action: () => {},
+      action: () => {
+         if (!note) return;
+        const html = generateHTML(JSON.parse(note.content), [
+          StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
+          Image.configure({ inline: false }),
+          Underline,
+          Highlight.configure({ multicolor: true }),
+          Link.configure({
+            openOnClick: false,
+            autolink: true,
+            linkOnPaste: true,
+          }),
+          HorizontalRule,
+          TaskList,
+          TaskItem.configure({ nested: true }),
+          TextAlign.configure({ types: ["heading", "paragraph"] }),
+        ]);
+        const markdown = turndown.turndown(html);
+        const blob = new Blob([markdown], { type: "text/markdown" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${note.title}.md`;
+        a.click();
+      },
     },
-    { label: "Export as PDF", icon: <FileDown size={15} />, action: () => {} },
+    {
+      label: "Export as PDF", icon: <FileDown size={15} />, action:async () => {
+       if (!note) return;
+              const html = generateHTML(JSON.parse(note.content), [
+                StarterKit,
+                Image,
+                Underline,
+                Highlight,
+                Link,
+                HorizontalRule,
+                TaskList,
+                TaskItem,
+                TextAlign,
+              ]);
+              await exportPdf(html, note.title);
+    } },
     { separator: true },
     {
       label: "Delete",

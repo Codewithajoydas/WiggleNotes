@@ -57,4 +57,6 @@ contextBridge.exposeInMainWorld("dbAPI", {
             html,
             fileName
         ),
+    setUnsavedChanges: (value) =>
+        ipcRenderer.invoke("set-unsaved-changes", value),
 });

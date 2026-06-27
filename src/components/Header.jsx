@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 export default function Header({ children, title }) {
   const navigate = useNavigate();
   useEffect(() => {
-    window.addEventListener("contextmenu", (e) => e.preventDefault());
   }, []);
   return (
     <header
@@ -23,7 +22,7 @@ export default function Header({ children, title }) {
         WebkitAppRegion: "drag",
       }}
     >
-      <div className="h-full px-5 flex items-center justify-between pr-[180px]">
+      <div className="h-full px-5 flex items-center justify-between pr-37.5">
         <div
           className="flex items-center gap-3"
           style={{

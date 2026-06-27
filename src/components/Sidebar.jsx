@@ -47,7 +47,7 @@ function SideNavLink({ to, icon, children }) {
         `relative flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all duration-150 group
         ${
           isActive
-            ? "text-white bg-white/[0.06]"
+            ? "text-white bg-white/6"
             : "text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.04]"
         }`
       }
@@ -118,7 +118,7 @@ export default function Sidebar() {
     setMenu({ visible: true, x: e.clientX, y: e.clientY });
   };
 
-  const items = [
+const items = [
     {
       label: "Open",
       icon: <FileText size={15} />,
@@ -247,14 +247,14 @@ export default function Sidebar() {
     <>
       <aside
         onContextMenu={(e) => e.preventDefault()}
-        className="w-64 h-screen bg-[#0e0e0e] text-white flex flex-col border-r border-white/[0.06] select-none"
+        className="w-64 h-screen bg-[#0e0e0e] text-white flex flex-col border-r border-white/6 select-none"
       >
         {/* ── Brand header ── */}
-        <div className="flex items-center gap-2.5 px-4 h-14 border-b border-white/[0.06] shrink-0">
+        <div className="flex items-center gap-2.5 px-4 h-14 border-b border-white/6 shrink-0">
           <img
             src={logo}
             alt=""
-            className="w-[40px] h-[40px] "
+            className="w-10 h-10 "
             onError={(e) => {
               e.target.style.display = "none";
               e.target.parentElement.innerHTML =
@@ -283,7 +283,7 @@ export default function Sidebar() {
               ${
                 isActive
                   ? "bg-blue-600 text-white shadow-lg shadow-blue-900/30"
-                  : "text-zinc-400 hover:text-zinc-100 hover:bg-white/[0.04]"
+                  : "text-zinc-400 hover:text-zinc-100 hover:bg-white/4"
               }`
             }
           >
@@ -298,7 +298,7 @@ export default function Sidebar() {
           {/* Search button */}
           <button
             onClick={() => setSearchOpen(true)}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.04] transition-all group"
+            className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm text-zinc-500 hover:text-zinc-200 hover:bg-white/4 transition-all group"
             style={{ WebkitAppRegion: "no-drag" }}
           >
             <span className="flex items-center gap-2.5">
@@ -308,7 +308,7 @@ export default function Sidebar() {
               />
               <span className="font-medium">Search</span>
             </span>
-            <kbd className="text-[10px] bg-white/[0.06] text-zinc-600 px-1.5 py-0.5 rounded font-mono">
+            <kbd className="text-[10px] bg-white/6 text-zinc-600 px-1.5 py-0.5 rounded font-mono">
               ⌘K
             </kbd>
           </button>
@@ -319,7 +319,7 @@ export default function Sidebar() {
           <div style={{ WebkitAppRegion: "no-drag" }}>
             {notes.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
-                <div className="w-10 h-10 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mb-3">
+                <div className="w-10 h-10 rounded-xl bg-white/[0.03] border border-white/6 flex items-center justify-center mb-3">
                   <FileText size={18} className="text-zinc-700" />
                 </div>
                 <p className="text-xs font-medium text-zinc-500">
