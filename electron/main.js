@@ -50,6 +50,8 @@ function createWindow() {
       deleted_at DATETIME DEFAULT NULL
     )
   `).run();
+  
+  
 
 
   win.webContents.on("context-menu", (event, params) => {

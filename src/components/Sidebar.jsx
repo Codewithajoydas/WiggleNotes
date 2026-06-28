@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import logo from "../../public/wigglenote_logo.svg";
 
@@ -89,7 +89,49 @@ export default function Sidebar() {
   const [notes, setNotes] = useState([]);
   const [searchOpen, setSearchOpen] = useState(false);
   const navigate = useNavigate();
+  useEffect(() => {
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "k" && e.ctrlKey) {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    });
+  }, []);
+  // ─── Resize ───────────────────────────────────────────────────────────────
+  const sidebarRef = useRef(null);
+  const isResizing = useRef(false);
+  const [sidebarWidth, setSidebarWidth] = useState(256);
 
+  const handleMouseDown = () => {
+    isResizing.current = true;
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (!isResizing.current) return;
+      const newWidth = e.clientX;
+      if (newWidth >= 180 && newWidth <= 480) {
+        setSidebarWidth(newWidth);
+      }
+    };
+
+    const handleMouseUp = () => {
+      isResizing.current = false;
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, []);
+
+  // ─── Notes ────────────────────────────────────────────────────────────────
   useEffect(() => {
     const loadNotes = async () => {
       const data = await readNote();
@@ -118,7 +160,7 @@ export default function Sidebar() {
     setMenu({ visible: true, x: e.clientX, y: e.clientY });
   };
 
-const items = [
+  const items = [
     {
       label: "Open",
       icon: <FileText size={15} />,
@@ -227,7 +269,14 @@ const items = [
       icon: <Trash2 size={15} />,
       action: () => {
         if (!selectedNote) return;
-        deleteNote(selectedNote.id);
+        const confirm = window.confirm(
+          "Are you sure you want to delete this note?",
+        );
+        if (confirm) {
+          deleteNote(selectedNote.id);
+        } else {
+          return;
+        }
         window.dispatchEvent(new Event("note-updated"));
       },
       danger: true,
@@ -246,15 +295,17 @@ const items = [
   return (
     <>
       <aside
+        ref={sidebarRef}
         onContextMenu={(e) => e.preventDefault()}
-        className="w-64 h-screen bg-[#0e0e0e] text-white flex flex-col border-r border-white/6 select-none"
+        style={{ width: sidebarWidth }}
+        className="relative h-screen bg-[#0e0e0e] text-white flex flex-col border-r border-white/6 select-none shrink-0"
       >
         {/* ── Brand header ── */}
         <div className="flex items-center gap-2.5 px-4 h-14 border-b border-white/6 shrink-0">
           <img
             src={logo}
             alt=""
-            className="w-10 h-10 "
+            className="w-10 h-10"
             onError={(e) => {
               e.target.style.display = "none";
               e.target.parentElement.innerHTML =
@@ -273,7 +324,6 @@ const items = [
 
         {/* ── Scrollable body ── */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden py-3 px-2 space-y-0.5 [&::-webkit-scrollbar]:hidden">
-          {/* Actions */}
           <SectionLabel>Actions</SectionLabel>
 
           <NavLink
@@ -295,7 +345,6 @@ const items = [
             Templates
           </SideNavLink>
 
-          {/* Search button */}
           <button
             onClick={() => setSearchOpen(true)}
             className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm text-zinc-500 hover:text-zinc-200 hover:bg-white/4 transition-all group"
@@ -313,7 +362,6 @@ const items = [
             </kbd>
           </button>
 
-          {/* Notes list */}
           <SectionLabel count={notes.length}>Notes</SectionLabel>
 
           <div style={{ WebkitAppRegion: "no-drag" }}>
@@ -347,20 +395,16 @@ const items = [
                   >
                     {({ isActive }) => (
                       <>
-                        {/* Bookmark accent */}
                         {isActive && (
                           <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-blue-500 rounded-full" />
                         )}
-
                         <FileText
                           size={14}
                           className={`shrink-0 transition-colors ${isActive ? "text-blue-400" : "text-zinc-700 group-hover:text-zinc-500"}`}
                         />
-
                         <span className="flex-1 min-w-0 text-xs font-medium truncate leading-relaxed">
                           {note.title || "Untitled"}
                         </span>
-
                         <div className="flex items-center gap-1 shrink-0">
                           {note.is_pinned !== 0 && (
                             <Pin size={11} className="text-zinc-600" />
@@ -384,7 +428,6 @@ const items = [
             )}
           </div>
 
-          {/* Collections */}
           <SectionLabel>Collections</SectionLabel>
           <SideNavLink to="/favorites" icon={<Star size={15} />}>
             Favorites
@@ -400,6 +443,12 @@ const items = [
             Settings
           </SideNavLink>
         </div>
+
+        {/* ── Drag handle ── */}
+        <div
+          onMouseDown={handleMouseDown}
+          className="absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-blue-500/40 transition-colors z-50"
+        />
       </aside>
 
       <SearchBar open={searchOpen} onClose={() => setSearchOpen(false)} />
@@ -439,6 +488,7 @@ const items = [
           </div>
         </div>
       )}
+
       <ContextMenu
         {...menu}
         items={items}
