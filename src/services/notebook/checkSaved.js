@@ -1,5 +1,4 @@
-const checkSaved = async (saved) => {
+
+export const checkSaved = async (saved) => {
     await window.dbAPI.setUnsavedChanges(saved);
 };
-
-export default checkSaved;
