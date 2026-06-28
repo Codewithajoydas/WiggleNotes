@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Electron build output
+release/
+dist/
+out/
+
+*.exe
+*.blockmap
