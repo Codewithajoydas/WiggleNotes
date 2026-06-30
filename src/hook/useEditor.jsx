@@ -11,9 +11,15 @@ import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import React from "react";
 
-export default function useTiptapEditor() {
+export default function useTiptapEditor({ spellcheck = true } = {}) {
   const editor = useEditor({
     immediatelyRender: false,
+    editorProps: {
+      
+      attributes: {
+        spellcheck,
+      },
+    },
     extensions: [
       StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
       Image.configure({ inline: false }),

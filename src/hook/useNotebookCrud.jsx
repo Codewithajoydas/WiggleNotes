@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useContext, useEffect, useRef } from "react";
 import createNote from "../services/notebook/createNote.services";
 import updateNote from "../services/notebook/updateNote.services";
 import checkSaved from "../services/notebook/checkSaved";
+import { SettingsContext } from "../store/Settings.context";
 
 /**
  * useNotebookCRUD
@@ -39,6 +40,15 @@ export default function useNotebookCRUD({
 
   const saveTimeout = useRef(null);
 
+  // ─── settings ───────────────────────────────────────────────────────────────
+
+  const { settings } = useContext(SettingsContext);
+
+  // SQLite stores auto_save as INTEGER (0/1), but depending on IPC serialization
+  // it can arrive as a string ("0"/"1"). Boolean("0") === true, so coerce via
+  // Number(...) === 1 instead of relying on Boolean() directly.
+  const isAutoSaveOn = Number(settings.auto_save) === 1;
+
   // ─── helpers ────────────────────────────────────────────────────────────────
 
   const buildPayload = useCallback(
@@ -64,7 +74,6 @@ export default function useNotebookCRUD({
   const create = useCallback(async () => {
     if (!editor || noteIdRef.current) return;
     if (editor.isEmpty) {
-      console.log("editor is empty:", editor.isEmpty);
       notify("error", "Error", "Note is empty.");
       return;
     }
@@ -106,6 +115,8 @@ export default function useNotebookCRUD({
   }, [save, debounceMs]);
 
   // ─── Ctrl + S ───────────────────────────────────────────────────────────────
+  // Note: manual save (Ctrl+S) intentionally ignores auto_save — it should
+  // always work regardless of the autosave setting.
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -123,10 +134,9 @@ export default function useNotebookCRUD({
 
   useEffect(() => {
     if (!editor) return;
-
     const onUpdate = () => {
       setSaved(false);
-      if (noteIdRef.current) {
+      if (noteIdRef.current && isAutoSaveOn) {
         debouncedSave();
       }
     };
@@ -136,17 +146,16 @@ export default function useNotebookCRUD({
       clearTimeout(saveTimeout.current);
       editor.off("update", onUpdate);
     };
-  }, [editor, debouncedSave, setSaved]);
+  }, [editor, debouncedSave, setSaved]); // isAutoSaveOn removed, checked via ref inside
 
   // ─── title / cover change → autosave ────────────────────────────────────────
 
   useEffect(() => {
     if (!noteIdRef.current) return;
+    if (!isAutoSaveOn) return;
     debouncedSave();
     return () => clearTimeout(saveTimeout.current);
-  }, [title, cover, debouncedSave]);
-  // ─── sync unsaved state to Electron main process ─────────────────────────────
- 
+  }, [title, cover, debouncedSave, isAutoSaveOn]);
 
   // ─── public API ─────────────────────────────────────────────────────────────
 

@@ -1,13 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext, useMemo } from "react";
 import { Star, Clock3, FileText, Trash2, RotateCcw, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import getDeleted from "../services/notebook/getDeleted.services";
-import restoreNote from "../services/notebook/restireNote.services";
+import restoreNote from "../services/notebook/restoreNote.services";
 import deletePermanently from "../services/notebook/deleteForever.services";
 import Confirm from "../components/ui/Confirm";
 import Alert from "../components/ui/alert";
 import ContextMenu from "../components/contextMenu";
+import { SettingsContext } from "../store/Settings.context";
+import { getThemeColors } from "../constants/Theme";
 
 export default function Trash() {
   const [notes, setNotes] = useState([]);
@@ -18,6 +20,12 @@ export default function Trash() {
   const [id, setId] = useState(null);
   const [menu, setMenu] = useState({ visible: false, x: 0, y: 0 });
   const [selectedNote, setSelectedNote] = useState(null);
+
+  const { settings } = useContext(SettingsContext);
+  const COLORS = useMemo(
+    () => getThemeColors(settings.theme, settings.accent_color),
+    [settings.theme, settings.accent_color],
+  );
 
   const showAlert = ({ type, title, message }) => {
     setAlert(null);
@@ -116,38 +124,165 @@ export default function Trash() {
 
   return (
     <>
-      <div className="h-full overflow-y-auto bg-zinc-950 text-zinc-100">
+      <div
+        className="h-full overflow-y-auto"
+        style={{ backgroundColor: COLORS.bgPrimary, color: COLORS.textPrimary }}
+      >
         <Header title="Trash" />
+
+        {/* ── Warning banner ── */}
         {notes.length !== 0 && openNotice && (
-          <div className="rounded-2xl border border-red-900 bg-red-950/40 p-4 m-6 flex justify-between items-center">
+          <div
+            className="rounded-2xl p-4 m-6 flex justify-between items-center"
+            style={{
+              backgroundColor: "rgba(239,68,68,0.08)",
+              border: "1px solid rgba(239,68,68,0.3)",
+            }}
+          >
             <div>
-              <h3 className="text-red-400 font-semibold text-sm">
+              <h3
+                className="font-semibold text-sm"
+                style={{ color: "#f87171" }}
+              >
                 Items in Trash will be permanently deleted after 30 days
               </h3>
-              <p className="text-red-300/70 text-xs mt-1">
+              <p
+                className="text-xs mt-1"
+                style={{ color: "rgba(252,165,165,0.7)" }}
+              >
                 Restore notes anytime before automatic removal.
               </p>
-          </div>
+            </div>
             <X
               size={20}
-              color="#fff"
-              className=" cursor-pointer"
+              className="cursor-pointer"
+              style={{ color: COLORS.textMuted }}
               onClick={() => setOpenNotice(false)}
             />
-            </div>
+          </div>
         )}
+
         <div className="max-w-7xl mx-auto p-6">
           {notes.length === 0 ? (
             <div className="h-[70vh] flex items-center justify-center">
               <div className="text-center max-w-md">
-                <div className="mx-auto h-28 w-28 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center">
-                  <Trash2 size={50} className="text-red-500" />
+                <div
+                  className="mx-auto h-28 w-28 rounded-full flex items-center justify-center"
+                  style={{
+                    backgroundColor: COLORS.bgSecondary,
+                    border: `1px solid ${COLORS.border}`,
+                  }}
+                >
+                  <Trash2 size={50} style={{ color: "#ef4444" }} />
                 </div>
-                <h2 className="text-2xl font-bold mt-6">Trash is Empty</h2>
-                <p className="text-zinc-400 mt-3">
+                <h2
+                  className="text-2xl font-bold mt-6"
+                  style={{ color: COLORS.textPrimary }}
+                >
+                  Trash is Empty
+                </h2>
+                <p className="mt-3" style={{ color: COLORS.textMuted }}>
                   Deleted notes will appear here before permanent removal.
                 </p>
               </div>
+            </div>
+          ) : settings.default_view === "list" ? (
+            <div className="flex flex-col gap-2">
+              {notes.map((note) => (
+                <div
+                  key={note.id}
+                  onContextMenu={(e) => handleContextMenu(e, note)}
+                  className="group flex items-center gap-4 rounded-2xl px-4 py-3 cursor-pointer transition-all duration-200"
+                  style={{
+                    backgroundColor: COLORS.bgSecondary,
+                    border: `1px solid ${COLORS.border}`,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = COLORS.accent;
+                    e.currentTarget.style.backgroundColor = COLORS.bgHover;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = COLORS.border;
+                    e.currentTarget.style.backgroundColor = COLORS.bgSecondary;
+                  }}
+                >
+                  <div
+                    className="h-9 w-9 shrink-0 rounded-lg flex items-center justify-center"
+                    style={{ backgroundColor: COLORS.bgHover }}
+                  >
+                    <FileText size={16} style={{ color: COLORS.textMuted }} />
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <h2
+                      className="font-semibold text-sm truncate"
+                      style={{ color: COLORS.textPrimary }}
+                    >
+                      {note.title || "Untitled Note"}
+                    </h2>
+                    <p
+                      className="text-xs truncate"
+                      style={{ color: COLORS.textMuted }}
+                    >
+                      {getPreview(note.content)}
+                    </p>
+                  </div>
+
+                  <div
+                    className="flex items-center gap-2 text-xs shrink-0"
+                    style={{ color: COLORS.textSubtle }}
+                  >
+                    <Clock3 size={13} />
+                    <span>{formatDate(note.updated_at)}</span>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        restoreData(note.id);
+                      }}
+                      className="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                      style={{
+                        backgroundColor: "rgba(16,185,129,0.1)",
+                        color: "#34d399",
+                      }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.backgroundColor =
+                          "rgba(16,185,129,0.2)")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.backgroundColor =
+                          "rgba(16,185,129,0.1)")
+                      }
+                    >
+                      Restore
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setId(note.id);
+                        setOpen(true);
+                      }}
+                      className="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                      style={{
+                        backgroundColor: "rgba(239,68,68,0.1)",
+                        color: "#f87171",
+                      }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.backgroundColor =
+                          "rgba(239,68,68,0.2)")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.backgroundColor =
+                          "rgba(239,68,68,0.1)")
+                      }
+                    >
+                      Delete Forever
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
@@ -155,37 +290,89 @@ export default function Trash() {
                 <div
                   key={note.id}
                   onContextMenu={(e) => handleContextMenu(e, note)}
-                  className="group bg-zinc-900 border border-zinc-800 rounded-3xl p-5 cursor-pointer transition-all duration-200 hover:border-blue-500 hover:bg-zinc-800 hover:-translate-y-1 hover:shadow-[0_0_30px_rgba(59,130,246,0.15)]"
+                  className="group rounded-3xl p-5 cursor-pointer transition-all duration-200 hover:-translate-y-1"
+                  style={{
+                    backgroundColor: COLORS.bgSecondary,
+                    border: `1px solid ${COLORS.border}`,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = COLORS.accent;
+                    e.currentTarget.style.backgroundColor = COLORS.bgHover;
+                    e.currentTarget.style.boxShadow = `0 0 30px ${COLORS.accent}26`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = COLORS.border;
+                    e.currentTarget.style.backgroundColor = COLORS.bgSecondary;
+                    e.currentTarget.style.boxShadow = "none";
+                  }}
                 >
+                  {/* Card header */}
                   <div className="flex items-start justify-between mb-4">
-                    <div className="h-10 w-10 rounded-xl bg-zinc-800 flex items-center justify-center">
-                      <FileText size={18} className="text-zinc-400" />
+                    <div
+                      className="h-10 w-10 rounded-xl flex items-center justify-center"
+                      style={{ backgroundColor: COLORS.bgHover }}
+                    >
+                      <FileText size={18} style={{ color: COLORS.textMuted }} />
                     </div>
-                    <div className="h-8 w-8 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center">
-                      <Trash2 size={14} className="text-red-500" />
+                    <div
+                      className="h-8 w-8 rounded-lg flex items-center justify-center"
+                      style={{
+                        backgroundColor: "rgba(239,68,68,0.1)",
+                        border: "1px solid rgba(239,68,68,0.2)",
+                      }}
+                    >
+                      <Trash2 size={14} style={{ color: "#ef4444" }} />
                     </div>
                   </div>
 
-                  <h2 className="font-semibold text-sm text-zinc-100 line-clamp-2 mb-3">
+                  {/* Title */}
+                  <h2
+                    className="font-semibold text-sm line-clamp-2 mb-3"
+                    style={{ color: COLORS.textPrimary }}
+                  >
                     {note.title || "Untitled Note"}
                   </h2>
 
-                  <p className="text-xs text-zinc-400 leading-relaxed line-clamp-4 min-h-[80px]">
+                  {/* Preview */}
+                  <p
+                    className="text-xs leading-relaxed line-clamp-4 min-h-[80px]"
+                    style={{ color: COLORS.textMuted }}
+                  >
                     {getPreview(note.content)}
                   </p>
 
-                  <div className="mt-5 pt-4 border-t border-zinc-800 flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-zinc-500 text-xs">
+                  {/* Footer */}
+                  <div
+                    className="mt-5 pt-4 flex items-center justify-between"
+                    style={{ borderTop: `1px solid ${COLORS.border}` }}
+                  >
+                    <div
+                      className="flex items-center gap-2 text-xs"
+                      style={{ color: COLORS.textSubtle }}
+                    >
                       <Clock3 size={13} />
                       <span>{formatDate(note.updated_at)}</span>
                     </div>
+
                     <div className="flex items-center gap-2">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           restoreData(note.id);
                         }}
-                        className="px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-xs font-medium"
+                        className="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                        style={{
+                          backgroundColor: "rgba(16,185,129,0.1)",
+                          color: "#34d399",
+                        }}
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.backgroundColor =
+                            "rgba(16,185,129,0.2)")
+                        }
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.backgroundColor =
+                            "rgba(16,185,129,0.1)")
+                        }
                       >
                         Restore
                       </button>
@@ -195,7 +382,19 @@ export default function Trash() {
                           setId(note.id);
                           setOpen(true);
                         }}
-                        className="px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 text-xs font-medium"
+                        className="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                        style={{
+                          backgroundColor: "rgba(239,68,68,0.1)",
+                          color: "#f87171",
+                        }}
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.backgroundColor =
+                            "rgba(239,68,68,0.2)")
+                        }
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.backgroundColor =
+                            "rgba(239,68,68,0.1)")
+                        }
                       >
                         Delete Forever
                       </button>
@@ -222,6 +421,7 @@ export default function Trash() {
         />
         {alert && <Alert {...alert} onClose={() => setAlert(null)} />}
       </div>
+
       <ContextMenu
         h={100}
         {...menu}

@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { useContext, useMemo } from "react";
+import { SettingsContext } from "../store/Settings.context";
+import { getThemeColors } from "../constants/Theme";
 import TurndownService from "turndown";
 
 import {
@@ -24,7 +26,7 @@ import readNote from "../services/notebook/readNote.services";
 import renameNotes from "../services/notebook/renameNote.services";
 import deleteNote from "../services/notebook/deleteNote.services";
 import exportPdf from "../services/notebook/downloadPDFNote";
-import pinNote from "../services/notebook/pinNote.services"; // Adjust the path if necessary
+import pinNote from "../services/notebook/pinNote.services";
 
 import { generateHTML } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
@@ -36,9 +38,17 @@ import TaskItem from "@tiptap/extension-task-item";
 import TextAlign from "@tiptap/extension-text-align";
 import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import Underline from "@tiptap/extension-underline";
+
 export default function FavNote() {
   const turndown = new TurndownService();
-const [newTitle, setNewTitle] = useState("");
+  const [newTitle, setNewTitle] = useState("");
+  const { settings } = useContext(SettingsContext);
+
+  const COLORS = useMemo(
+    () => getThemeColors(settings.theme, settings.accent_color),
+    [settings.theme, settings.accent_color],
+  );
+
   const [notes, setNotes] = useState([]);
   const navigate = useNavigate();
   const [menu, setMenu] = useState({ visible: false, x: 0, y: 0 });
@@ -169,11 +179,13 @@ const [newTitle, setNewTitle] = useState("");
     setNotes(notes);
     window.dispatchEvent(new Event("note-updated"));
   };
+
   const handleContextMenu = (e, note) => {
     e.preventDefault();
     setSelectedNote(note);
     setMenu({ visible: true, x: e.clientX, y: e.clientY });
   };
+
   useEffect(() => {
     window.addEventListener("note-updated", getNotes);
     getNotes();
@@ -187,17 +199,11 @@ const [newTitle, setNewTitle] = useState("");
   const getPreview = (content) => {
     try {
       const json = typeof content === "string" ? JSON.parse(content) : content;
-
       const extractText = (node) => {
         if (node.text) return node.text;
-
-        if (node.content) {
-          return node.content.map(extractText).join(" ");
-        }
-
+        if (node.content) return node.content.map(extractText).join(" ");
         return "";
       };
-
       return extractText(json).slice(0, 160);
     } catch {
       return "No preview available";
@@ -208,190 +214,239 @@ const [newTitle, setNewTitle] = useState("");
     const now = new Date();
     const updated = new Date(date);
     const diff = Math.floor((now - updated) / 1000);
-
     if (diff < 60) return "Just now";
-
-    if (diff < 3600) {
-      return `${Math.floor(diff / 60)}m ago`;
-    }
-
-    if (diff < 86400) {
-      return `${Math.floor(diff / 3600)}h ago`;
-    }
-
-    if (diff < 604800) {
-      return `${Math.floor(diff / 86400)}d ago`;
-    }
-
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
     return updated.toLocaleDateString();
   };
 
   return (
-    <div className="h-full overflow-y-auto bg-zinc-950 text-zinc-100">
-      {" "}
+    <div
+      className="h-full overflow-y-auto"
+      style={{ backgroundColor: COLORS.bgPrimary, color: COLORS.textPrimary }}
+    >
       <Header title="Favorite Notes" />
+
       <div className="max-w-7xl mx-auto p-6">
         {notes.length === 0 ? (
           <div className="h-[70vh] flex items-center justify-center">
             <div className="text-center max-w-md">
               <div
-                className="
-              mx-auto
-              h-28
-              w-28
-              rounded-full
-              bg-zinc-900
-              border
-              border-zinc-800
-              flex
-              items-center
-              justify-center
-            "
+                className="mx-auto h-28 w-28 rounded-full flex items-center justify-center"
+                style={{
+                  backgroundColor: COLORS.bgSecondary,
+                  border: `1px solid ${COLORS.border}`,
+                }}
               >
-                <Star size={50} className="fill-blue-500 text-blue-500" />
+                <Star
+                  size={50}
+                  style={{ fill: COLORS.accent, color: COLORS.accent }}
+                />
               </div>
 
-              <h2 className="text-2xl font-bold mt-6 text-zinc-100">
+              <h2
+                className="text-2xl font-bold mt-6"
+                style={{ color: COLORS.textPrimary }}
+              >
                 Nothing Starred Yet
               </h2>
 
-              <p className="text-zinc-400 mt-3 leading-relaxed">
+              <p
+                className="mt-3 leading-relaxed"
+                style={{ color: COLORS.textMuted }}
+              >
                 Important notes that you mark as favorites will appear here for
                 quick access.
               </p>
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-            {notes.map((note) => (
-              <div
-                key={note.id}
-                onContextMenu={(e) => handleContextMenu(e, note)}
-                onClick={() => navigate(`/read/note/${note.id}`)}
-                className="
-              group
-              bg-zinc-900
-              border
-              border-zinc-800
-              rounded-3xl
-              p-5
-              cursor-pointer
-              transition-all
-              duration-200
-              hover:border-blue-500
-              hover:bg-zinc-800
-              hover:-translate-y-1
-              hover:shadow-[0_0_30px_rgba(59,130,246,0.15)]
-            "
-              >
-                <div className="flex items-start justify-between mb-4">
+          <div className="grid  gap-5">
+            {settings.default_view === "list" ? (
+              <div className="flex flex-col gap-2">
+                {notes.map((note) => (
                   <div
-                    className="
-                  h-10
-                  w-10
-                  rounded-xl
-                  bg-zinc-800
-                  flex
-                  items-center
-                  justify-center
-                "
+                    key={note.id}
+                    onContextMenu={(e) => handleContextMenu(e, note)}
+                    onClick={() => navigate(`/read/note/${note.id}`)}
+                    className="group flex items-center gap-4 rounded-2xl px-4 py-3 cursor-pointer transition-all duration-200"
+                    style={{
+                      backgroundColor: COLORS.bgSecondary,
+                      border: `1px solid ${COLORS.border}`,
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = COLORS.accent;
+                      e.currentTarget.style.backgroundColor = COLORS.bgHover;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = COLORS.border;
+                      e.currentTarget.style.backgroundColor =
+                        COLORS.bgSecondary;
+                    }}
                   >
-                    <FileText size={18} className="text-zinc-400" />
+                    <div
+                      className="h-9 w-9 shrink-0 rounded-lg flex items-center justify-center"
+                      style={{ backgroundColor: COLORS.bgHover }}
+                    >
+                      <FileText size={16} style={{ color: COLORS.textMuted }} />
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <h2
+                        className="font-semibold text-sm truncate"
+                        style={{ color: COLORS.textPrimary }}
+                      >
+                        {note.title || "Untitled Note"}
+                      </h2>
+                      <p
+                        className="text-xs truncate"
+                        style={{ color: COLORS.textMuted }}
+                      >
+                        {getPreview(note.content)}
+                      </p>
+                    </div>
+
+                    <div
+                      className="flex items-center gap-2 text-xs shrink-0"
+                      style={{ color: COLORS.textSubtle }}
+                    >
+                      <Clock3 size={13} />
+                      <span>{formatDate(note.updated_at)}</span>
+                    </div>
+
+                    <div
+                      className="h-7 w-7 shrink-0 rounded-lg flex items-center justify-center"
+                      style={{
+                        backgroundColor: `${COLORS.accent}1a`,
+                        border: `1px solid ${COLORS.accent}33`,
+                      }}
+                    >
+                      <Star
+                        size={12}
+                        style={{ fill: COLORS.accent, color: COLORS.accent }}
+                      />
+                    </div>
                   </div>
-
-                  <div
-                    className="
-                  h-8
-                  w-8
-                  rounded-lg
-                  bg-blue-500/10
-                  border
-                  border-blue-500/20
-                  flex
-                  items-center
-                  justify-center
-                "
-                  >
-                    <Star size={14} className="fill-blue-500 text-blue-500" />
-                  </div>
-                </div>
-
-                <h2
-                  className="
-                font-semibold
-                text-sm
-                text-zinc-100
-                line-clamp-2
-                mb-3
-              "
-                >
-                  {note.title || "Untitled Note"}
-                </h2>
-
-                <p
-                  className="
-                text-xs
-                text-zinc-400
-                leading-relaxed
-                line-clamp-4
-                min-h-[80px]
-              "
-                >
-                  {getPreview(note.content)}
-                </p>
-
-                <div
-                  className="
-                mt-5
-                pt-4
-                border-t
-                border-zinc-800
-                flex
-                items-center
-                justify-between
-              "
-                >
-                  <div
-                    className="
-                  flex
-                  items-center
-                  gap-2
-                  text-zinc-500
-                  text-xs
-                "
-                  >
-                    <Clock3 size={13} />
-                    <span>{formatDate(note.updated_at)}</span>
-                  </div>
-
-                  <div
-                    className="
-                  text-xs
-                  font-medium
-                  text-blue-400
-                  opacity-0
-                  translate-x-2
-                  transition-all
-                  duration-200
-                  group-hover:opacity-100
-                  group-hover:translate-x-0
-                "
-                  >
-                    Open →
-                  </div>
-                </div>
+                ))}
               </div>
-            ))}
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                {notes.map((note) => (
+                  <div
+                    key={note.id}
+                    onContextMenu={(e) => handleContextMenu(e, note)}
+                    onClick={() => navigate(`/read/note/${note.id}`)}
+                    className="group rounded-3xl p-5 cursor-pointer transition-all duration-200 hover:-translate-y-1"
+                    style={{
+                      backgroundColor: COLORS.bgSecondary,
+                      border: `1px solid ${COLORS.border}`,
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = COLORS.accent;
+                      e.currentTarget.style.backgroundColor = COLORS.bgHover;
+                      e.currentTarget.style.boxShadow = `0 0 30px ${COLORS.accent}26`;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = COLORS.border;
+                      e.currentTarget.style.backgroundColor =
+                        COLORS.bgSecondary;
+                      e.currentTarget.style.boxShadow = "none";
+                    }}
+                  >
+                    {/* Card header */}
+                    <div className="flex items-start justify-between mb-4">
+                      <div
+                        className="h-10 w-10 rounded-xl flex items-center justify-center"
+                        style={{ backgroundColor: COLORS.bgHover }}
+                      >
+                        <FileText
+                          size={18}
+                          style={{ color: COLORS.textMuted }}
+                        />
+                      </div>
+
+                      <div
+                        className="h-8 w-8 rounded-lg flex items-center justify-center"
+                        style={{
+                          backgroundColor: `${COLORS.accent}1a`,
+                          border: `1px solid ${COLORS.accent}33`,
+                        }}
+                      >
+                        <Star
+                          size={14}
+                          style={{ fill: COLORS.accent, color: COLORS.accent }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Title */}
+                    <h2
+                      className="font-semibold text-sm line-clamp-2 mb-3"
+                      style={{ color: COLORS.textPrimary }}
+                    >
+                      {note.title || "Untitled Note"}
+                    </h2>
+
+                    {/* Preview */}
+                    <p
+                      className="text-xs leading-relaxed line-clamp-4 min-h-[80px]"
+                      style={{ color: COLORS.textMuted }}
+                    >
+                      {getPreview(note.content)}
+                    </p>
+
+                    {/* Footer */}
+                    <div
+                      className="mt-5 pt-4 flex items-center justify-between"
+                      style={{ borderTop: `1px solid ${COLORS.border}` }}
+                    >
+                      <div
+                        className="flex items-center gap-2 text-xs"
+                        style={{ color: COLORS.textSubtle }}
+                      >
+                        <Clock3 size={13} />
+                        <span>{formatDate(note.updated_at)}</span>
+                      </div>
+
+                      <div
+                        className="text-xs font-medium opacity-0 translate-x-2 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0"
+                        style={{ color: COLORS.accent }}
+                      >
+                        Open →
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
+
+      {/* ── Rename modal ── */}
       {renameOpen && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-500">
-          <div className="bg-zinc-900/90 backdrop-blur-sm border border-white/8 rounded-2xl p-5 w-80 shadow-2xl">
-            <h2 className="text-sm font-semibold text-zinc-100 mb-1">
+        <div
+          className="fixed inset-0 flex items-center justify-center z-50"
+          style={{
+            backgroundColor: "rgba(0,0,0,0.7)",
+            backdropFilter: "blur(4px)",
+          }}
+        >
+          <div
+            className="rounded-2xl p-5 w-80 shadow-2xl"
+            style={{
+              backgroundColor: COLORS.bgSecondary,
+              border: `1px solid ${COLORS.border}`,
+            }}
+          >
+            <h2
+              className="text-sm font-semibold mb-1"
+              style={{ color: COLORS.textPrimary }}
+            >
               Rename note
             </h2>
-            <p className="text-xs text-zinc-600 mb-4">
+            <p className="text-xs mb-4" style={{ color: COLORS.textSubtle }}>
               Enter a new title for this note.
             </p>
             <input
@@ -399,19 +454,47 @@ const [newTitle, setNewTitle] = useState("");
               onChange={(e) => setNewTitle(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleRename()}
               autoFocus
-              className="w-full px-3 py-2 text-sm rounded-lg bg-white/[0.05] border border-white/[0.08] text-zinc-100 placeholder:text-zinc-600 outline-none focus:border-blue-500/50 transition-colors"
+              className="w-full px-3 py-2 text-sm rounded-lg outline-none transition-colors"
+              style={{
+                backgroundColor: COLORS.bgHover,
+                border: `1px solid ${COLORS.border}`,
+                color: COLORS.textPrimary,
+              }}
+              onFocus={(e) =>
+                (e.currentTarget.style.borderColor = `${COLORS.accent}80`)
+              }
+              onBlur={(e) =>
+                (e.currentTarget.style.borderColor = COLORS.border)
+              }
               placeholder="Note title"
             />
             <div className="flex justify-end gap-2 mt-4">
               <button
                 onClick={() => setRenameOpen(false)}
-                className="px-3 py-1.5 text-xs rounded-lg bg-white/[0.05] text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.08] transition-colors"
+                className="px-3 py-1.5 text-xs rounded-lg transition-colors"
+                style={{
+                  backgroundColor: COLORS.bgHover,
+                  color: COLORS.textMuted,
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.color = COLORS.textPrimary)
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.color = COLORS.textMuted)
+                }
               >
                 Cancel
               </button>
               <button
                 onClick={handleRename}
-                className="px-3 py-1.5 text-xs rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors"
+                className="px-3 py-1.5 text-xs rounded-lg font-medium text-white transition-colors"
+                style={{ backgroundColor: COLORS.accent }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.filter = "brightness(1.1)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.filter = "brightness(1)")
+                }
               >
                 Rename
               </button>
@@ -419,6 +502,7 @@ const [newTitle, setNewTitle] = useState("");
           </div>
         </div>
       )}
+
       <ContextMenu
         {...menu}
         items={items}

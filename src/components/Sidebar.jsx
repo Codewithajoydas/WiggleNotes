@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import logo from "../../public/wigglenote_logo.svg";
+import logo from "/wigglenote_logo.svg";
 
 import {
   Search,
@@ -17,6 +17,7 @@ import {
   FileDown,
   Edit,
   LayoutTemplate,
+  Plus,
 } from "lucide-react";
 import readNote from "../services/notebook/readNote.services";
 import SearchBar from "./Search";
@@ -37,32 +38,42 @@ import Underline from "@tiptap/extension-underline";
 import TurndownService from "turndown";
 import exportPdf from "../services/notebook/downloadPDFNote";
 import deleteNote from "../services/notebook/deleteNote.services";
+import { SettingsContext } from "../store/Settings.context";
+import { getThemeColors } from "../constants/Theme";
 
 // ─── Nav item used for quick actions + collections ────────────────────────────
-function SideNavLink({ to, icon, children }) {
+function SideNavLink({ to, icon, children, colors }) {
   return (
     <NavLink
       to={to}
-      className={({ isActive }) =>
-        `relative flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all duration-150 group
-        ${
-          isActive
-            ? "text-white bg-white/6"
-            : "text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.04]"
-        }`
-      }
+      className="relative flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all duration-150 group"
+      style={({ isActive }) => ({
+        color: isActive ? colors.textPrimary : colors.textMuted,
+        backgroundColor: isActive ? colors.bgHover : "transparent",
+      })}
     >
       {({ isActive }) => (
         <>
           {isActive && (
-            <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-blue-500 rounded-full" />
+            <span
+              className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full"
+              style={{ backgroundColor: colors.accent }}
+            />
           )}
           <span
-            className={`transition-colors ${isActive ? "text-blue-400" : "text-zinc-600 group-hover:text-zinc-400"}`}
+            style={{
+              color: isActive ? colors.accent : colors.textPrimary,
+              transition: "color 150ms",
+            }}
           >
             {icon}
           </span>
-          <span className="font-medium">{children}</span>
+          <span
+            className="font-semibold"
+            style={{ color: isActive ? colors.accent : colors.textPrimary }}
+          >
+            {children}
+          </span>
         </>
       )}
     </NavLink>
@@ -70,14 +81,22 @@ function SideNavLink({ to, icon, children }) {
 }
 
 // ─── Section label ─────────────────────────────────────────────────────────────
-function SectionLabel({ children, count }) {
+function SectionLabel({ children, count, colors }) {
   return (
     <div className="flex items-center justify-between px-3 mb-1.5 mt-5 first:mt-0">
-      <span className="text-[10px] font-semibold tracking-widest uppercase text-zinc-600">
+      <span
+        className="text-[10px] font-semibold tracking-widest"
+        style={{ color: colors.textMuted }}
+      >
         {children}
       </span>
       {count !== undefined && (
-        <span className="text-[10px] text-zinc-700 font-mono">{count}</span>
+        <span
+          className="text-[10px] font-mono"
+          style={{ color: colors.textSubtle }}
+        >
+          {count}
+        </span>
       )}
     </div>
   );
@@ -86,9 +105,21 @@ function SectionLabel({ children, count }) {
 // ─── Main Sidebar ─────────────────────────────────────────────────────────────
 export default function Sidebar() {
   const turndown = new TurndownService();
+  const navigate = useNavigate();
   const [notes, setNotes] = useState([]);
   const [searchOpen, setSearchOpen] = useState(false);
-  const navigate = useNavigate();
+  const [menu, setMenu] = useState({ visible: false, x: 0, y: 0 });
+  const [selectedNote, setSelectedNote] = useState(null);
+  const [renameOpen, setRenameOpen] = useState(false);
+  const [newTitle, setNewTitle] = useState("");
+
+  // ---THEME------------------------------
+  const { settings, setSettings } = useContext(SettingsContext);
+  const COLORS = useMemo(
+    () => getThemeColors(settings.theme, settings.accent_color),
+    [settings.theme, settings.accent_color],
+  );
+
   useEffect(() => {
     window.addEventListener("keydown", (e) => {
       if (e.key === "k" && e.ctrlKey) {
@@ -97,6 +128,7 @@ export default function Sidebar() {
       }
     });
   }, []);
+
   // ─── Resize ───────────────────────────────────────────────────────────────
   const sidebarRef = useRef(null);
   const isResizing = useRef(false);
@@ -148,11 +180,6 @@ export default function Sidebar() {
     window.addEventListener("note-updated", refresh);
     return () => window.removeEventListener("note-updated", refresh);
   }, []);
-
-  const [menu, setMenu] = useState({ visible: false, x: 0, y: 0 });
-  const [selectedNote, setSelectedNote] = useState(null);
-  const [renameOpen, setRenameOpen] = useState(false);
-  const [newTitle, setNewTitle] = useState("");
 
   const handleContextMenu = (e, note) => {
     e.preventDefault();
@@ -297,26 +324,41 @@ export default function Sidebar() {
       <aside
         ref={sidebarRef}
         onContextMenu={(e) => e.preventDefault()}
-        style={{ width: sidebarWidth }}
-        className="relative h-screen bg-[#0e0e0e] text-white flex flex-col border-r border-white/6 select-none shrink-0"
+        style={{
+          width: sidebarWidth,
+          background: COLORS.bgSecondary,
+          color: COLORS.textPrimary,
+          borderColor: COLORS.border,
+          borderRightWidth: 1,
+          borderRightStyle: "solid",
+        }}
+        className="relative h-screen flex flex-col select-none shrink-0"
       >
         {/* ── Brand header ── */}
-        <div className="flex items-center gap-2.5 px-4 h-14 border-b border-white/6 shrink-0">
+        <div
+          className="flex items-center gap-2.5 px-4 h-16 shrink-0"
+          style={{ borderBottom: `1px solid ${COLORS.border}` }}
+        >
           <img
             src={logo}
             alt=""
             className="w-10 h-10"
             onError={(e) => {
               e.target.style.display = "none";
-              e.target.parentElement.innerHTML =
-                '<span class="text-white text-xs font-bold">W</span>';
+              e.target.parentElement.innerHTML = `<span class="text-xs font-bold" style="color: ${COLORS.accent};">W</span>`;
             }}
           />
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-white tracking-tight leading-none">
+            <p
+              className="text-sm font-semibold tracking-tight leading-none"
+              style={{ color: COLORS.textPrimary }}
+            >
               WiggleNote
             </p>
-            <p className="text-[10px] text-zinc-600 mt-0.5 leading-none">
+            <p
+              className="text-[10px] mt-0.5 leading-none"
+              style={{ color: COLORS.textSubtle }}
+            >
               Personal workspace
             </p>
           </div>
@@ -324,56 +366,83 @@ export default function Sidebar() {
 
         {/* ── Scrollable body ── */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden py-3 px-2 space-y-0.5 [&::-webkit-scrollbar]:hidden">
-          <SectionLabel>Actions</SectionLabel>
+          <SectionLabel colors={COLORS}>Actions</SectionLabel>
 
-          <NavLink
+          {/* New Note — accent filled when active */}
+          <SideNavLink
             to="/create-note"
-            className={({ isActive }) =>
-              `relative flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all duration-150 group
-              ${
-                isActive
-                  ? "bg-blue-600 text-white shadow-lg shadow-blue-900/30"
-                  : "text-zinc-400 hover:text-zinc-100 hover:bg-white/4"
-              }`
-            }
+            icon={<Plus size={15} />}
+            colors={COLORS}
           >
-            <FilePlus size={15} />
-            <span className="font-medium">New note</span>
-          </NavLink>
-
-          <SideNavLink to="/templates" icon={<LayoutTemplate size={15} />}>
-            Templates
+            New Note
           </SideNavLink>
 
+          {/* <SideNavLink
+            to="/templates"
+            icon={<LayoutTemplate size={15} />}
+            colors={COLORS}
+          >
+            Templates
+          </SideNavLink> */}
+
+          {/* Search button */}
           <button
             onClick={() => setSearchOpen(true)}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm text-zinc-500 hover:text-zinc-200 hover:bg-white/4 transition-all group"
-            style={{ WebkitAppRegion: "no-drag" }}
+            className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-all group"
+            style={{
+              color: COLORS.textMuted,
+              WebkitAppRegion: "no-drag",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = COLORS.bgHover;
+              e.currentTarget.style.color = COLORS.textPrimary;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "transparent";
+              e.currentTarget.style.color = COLORS.textMuted;
+            }}
           >
             <span className="flex items-center gap-2.5">
-              <Search
-                size={15}
-                className="text-zinc-600 group-hover:text-zinc-400 transition-colors"
-              />
-              <span className="font-medium">Search</span>
+              <Search size={15} style={{ color: COLORS.textPrimary }} />
+              <span className="font-medium" style={{ color: COLORS.textPrimary }}>Search</span>
             </span>
-            <kbd className="text-[10px] bg-white/6 text-zinc-600 px-1.5 py-0.5 rounded font-mono">
+            <kbd
+              className="text-[10px] px-1.5 py-0.5 rounded font-mono"
+              style={{
+                backgroundColor: COLORS.bgHover,
+                color: COLORS.textSubtle,
+              }}
+            >
               ⌘K
             </kbd>
           </button>
 
-          <SectionLabel count={notes.length}>Notes</SectionLabel>
+          <SectionLabel count={notes.length} colors={COLORS}>
+            Notes
+          </SectionLabel>
 
           <div style={{ WebkitAppRegion: "no-drag" }}>
             {notes.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
-                <div className="w-10 h-10 rounded-xl bg-white/[0.03] border border-white/6 flex items-center justify-center mb-3">
-                  <FileText size={18} className="text-zinc-700" />
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
+                  style={{
+                    backgroundColor: COLORS.bgHover,
+                    border: `1px solid ${COLORS.border}`,
+                  }}
+                >
+                  <FileText size={18} style={{ color: COLORS.accent }} />
                 </div>
-                <p className="text-xs font-medium text-zinc-500">
+                <p
+                  className="text-xs font-medium"
+                  style={{ color: COLORS.textPrimary }}
+                >
                   No notes yet
                 </p>
-                <p className="text-[11px] text-zinc-700 mt-1 leading-relaxed">
+                <p
+                  className="text-[11px] mt-1 leading-relaxed"
+                  style={{ color: COLORS.textSecondary }}
+                >
                   Create your first note to get started
                 </p>
               </div>
@@ -384,33 +453,48 @@ export default function Sidebar() {
                     onContextMenu={(e) => handleContextMenu(e, note)}
                     key={note.id}
                     to={`/read/note/${note.id}`}
-                    className={({ isActive }) =>
-                      `relative group flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all duration-150
-                      ${
-                        isActive
-                          ? "bg-white/[0.06] text-white"
-                          : "text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.03]"
-                      }`
-                    }
+                    className="relative group flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all duration-150"
+                    style={({ isActive }) => ({
+                      backgroundColor: isActive
+                        ? COLORS.bgHover
+                        : "transparent",
+                      color: isActive ? COLORS.textPrimary : COLORS.textMuted,
+                    })}
                   >
                     {({ isActive }) => (
                       <>
                         {isActive && (
-                          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-blue-500 rounded-full" />
+                          <span
+                            className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full"
+                            style={{ backgroundColor: COLORS.accent }}
+                          />
                         )}
                         <FileText
                           size={14}
-                          className={`shrink-0 transition-colors ${isActive ? "text-blue-400" : "text-zinc-700 group-hover:text-zinc-500"}`}
+                          className="shrink-0 transition-colors"
+                          style={{
+                            color: isActive ? COLORS.accent : COLORS.textSubtle,
+                          }}
                         />
                         <span className="flex-1 min-w-0 text-xs font-medium truncate leading-relaxed">
                           {note.title || "Untitled"}
                         </span>
                         <div className="flex items-center gap-1 shrink-0">
                           {note.is_pinned !== 0 && (
-                            <Pin size={11} className="text-zinc-600" />
+                            <Pin
+                              size={11}
+                              style={{ color: COLORS.textSubtle }}
+                            />
                           )}
                           <button
-                            className="opacity-0 group-hover:opacity-100 transition-opacity text-zinc-600 hover:text-zinc-300 p-0.5 rounded"
+                            className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded"
+                            style={{ color: COLORS.textSubtle }}
+                            onMouseEnter={(e) =>
+                              (e.currentTarget.style.color = COLORS.textPrimary)
+                            }
+                            onMouseLeave={(e) =>
+                              (e.currentTarget.style.color = COLORS.textSubtle)
+                            }
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -428,18 +512,29 @@ export default function Sidebar() {
             )}
           </div>
 
-          <SectionLabel>Collections</SectionLabel>
-          <SideNavLink to="/favorites" icon={<Star size={15} />}>
+          <SectionLabel colors={COLORS}>Collections</SectionLabel>
+          <SideNavLink
+            to="/favorites"
+            icon={<Star size={15} />}
+            colors={COLORS}
+          >
             Favorites
           </SideNavLink>
-          <SideNavLink to="/trash" icon={<Trash2 size={15} />}>
+          <SideNavLink to="/trash" icon={<Trash2 size={15} />} colors={COLORS}>
             Trash
           </SideNavLink>
         </div>
 
         {/* ── Footer ── */}
-        <div className="shrink-0 border-t border-white/6 px-2 py-2">
-          <SideNavLink to="/settings" icon={<Settings size={15} />}>
+        <div
+          className="shrink-0 px-2 py-2"
+          style={{ borderTop: `1px solid ${COLORS.border}` }}
+        >
+          <SideNavLink
+            to="/settings"
+            icon={<Settings size={15} />}
+            colors={COLORS}
+          >
             Settings
           </SideNavLink>
         </div>
@@ -447,7 +542,13 @@ export default function Sidebar() {
         {/* ── Drag handle ── */}
         <div
           onMouseDown={handleMouseDown}
-          className="absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-blue-500/40 transition-colors z-50"
+          className="absolute right-0 top-0 h-full w-1 cursor-col-resize transition-colors z-50"
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.backgroundColor = `${COLORS.accent}66`)
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.backgroundColor = "transparent")
+          }
         />
       </aside>
 
@@ -455,12 +556,27 @@ export default function Sidebar() {
 
       {/* ── Rename modal ── */}
       {renameOpen && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-500">
-          <div className="bg-zinc-900/90 backdrop-blur-sm border border-white/8 rounded-2xl p-5 w-80 shadow-2xl">
-            <h2 className="text-sm font-semibold text-zinc-100 mb-1">
+        <div
+          className="fixed inset-0 flex items-center justify-center z-500"
+          style={{
+            backgroundColor: "rgba(0,0,0,0.7)",
+            backdropFilter: "blur(4px)",
+          }}
+        >
+          <div
+            className="rounded-2xl p-5 w-80 shadow-2xl"
+            style={{
+              backgroundColor: COLORS.bgSecondary,
+              border: `1px solid ${COLORS.border}`,
+            }}
+          >
+            <h2
+              className="text-sm font-semibold mb-1"
+              style={{ color: COLORS.textPrimary }}
+            >
               Rename note
             </h2>
-            <p className="text-xs text-zinc-600 mb-4">
+            <p className="text-xs mb-4" style={{ color: COLORS.textSubtle }}>
               Enter a new title for this note.
             </p>
             <input
@@ -468,19 +584,47 @@ export default function Sidebar() {
               onChange={(e) => setNewTitle(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleRename()}
               autoFocus
-              className="w-full px-3 py-2 text-sm rounded-lg bg-white/[0.05] border border-white/[0.08] text-zinc-100 placeholder:text-zinc-600 outline-none focus:border-blue-500/50 transition-colors"
+              className="w-full px-3 py-2 text-sm rounded-lg outline-none transition-colors"
+              style={{
+                backgroundColor: COLORS.bgHover,
+                border: `1px solid ${COLORS.border}`,
+                color: COLORS.textPrimary,
+              }}
+              onFocus={(e) =>
+                (e.currentTarget.style.borderColor = `${COLORS.accent}80`)
+              }
+              onBlur={(e) =>
+                (e.currentTarget.style.borderColor = COLORS.border)
+              }
               placeholder="Note title"
             />
             <div className="flex justify-end gap-2 mt-4">
               <button
                 onClick={() => setRenameOpen(false)}
-                className="px-3 py-1.5 text-xs rounded-lg bg-white/[0.05] text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.08] transition-colors"
+                className="px-3 py-1.5 text-xs rounded-lg transition-colors"
+                style={{
+                  backgroundColor: COLORS.bgHover,
+                  color: COLORS.textMuted,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = COLORS.textPrimary;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = COLORS.textMuted;
+                }}
               >
                 Cancel
               </button>
               <button
                 onClick={handleRename}
-                className="px-3 py-1.5 text-xs rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors"
+                className="px-3 py-1.5 text-xs rounded-lg font-medium text-white transition-colors"
+                style={{ backgroundColor: COLORS.accent }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.filter = "brightness(1.1)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.filter = "brightness(1)")
+                }
               >
                 Rename
               </button>

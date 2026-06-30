@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useContext, useMemo } from "react";
 import { EditorContent } from "@tiptap/react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -9,6 +9,9 @@ import useTiptapEditor from "../hook/useEditor";
 import useNotebookCRUD from "../hook/useNotebookCRUD";
 import useNoteImage from "../hook/useNoteImage";
 import getNoteById from "../services/notebook/getNoteById.services";
+import { SettingsContext } from "../store/Settings.context";
+import { getThemeColors } from "../constants/Theme";
+import checkSaved from "../services/notebook/checkSaved";
 
 export default function EditNote() {
   const navigate = useNavigate();
@@ -24,15 +27,22 @@ export default function EditNote() {
   const coverImageInputRef = useRef(null);
   const imageInputRef = useRef(null);
 
-  const editor = useTiptapEditor();
+  const { settings } = useContext(SettingsContext);
+  const COLORS = useMemo(
+    () => getThemeColors(settings.theme, settings.accent_color),
+    [settings.theme, settings.accent_color],
+  );
 
-  // noteId is already known from the URL param
+  const editor = useTiptapEditor({
+    spellcheck: Boolean(Number(settings?.spell_check)),
+  });
+  
   const { save } = useNotebookCRUD({
     editor,
     noteId: id,
     title,
     cover,
-    setNoteId: () => {}, // no-op, id already exists
+    setNoteId: () => {},
     setSaved,
     setAlert,
   });
@@ -42,7 +52,6 @@ export default function EditNote() {
   // ─── Load note ──────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!editor) return;
-
     const loadNote = async () => {
       const note = await getNoteById(id);
       if (!note || note.is_deleted) {
@@ -52,31 +61,28 @@ export default function EditNote() {
       setTitle(note.title);
       if (note.cover_type)
         setCover({ type: note.cover_type, value: note.cover_value });
-      editor.commands.setContent(JSON.parse(note.content));
+      editor.commands.setContent(JSON.parse(note.content), false);
     };
-
     loadNote();
   }, [id, editor, navigate]);
 
   // ─── Refresh on note-updated event ──────────────────────────────────────────
-  useEffect(() => {
-    if (!editor) return;
-
-    const refresh = async () => {
-      const note = await getNoteById(id);
-      if (!note || note.is_deleted) {
-        navigate("/");
-        return;
-      }
-      setTitle(note.title);
-      if (note.cover_type)
-        setCover({ type: note.cover_type, value: note.cover_value });
-      editor.commands.setContent(JSON.parse(note.content));
-    };
-
-    window.addEventListener("note-updated", refresh);
-    return () => window.removeEventListener("note-updated", refresh);
-  }, [id, editor, navigate]);
+  // useEffect(() => {
+  //   if (!editor) return;
+  //   const refresh = async () => {
+  //     const note = await getNoteById(id);
+  //     if (!note || note.is_deleted) {
+  //       navigate("/");
+  //       return;
+  //     }
+  //     setTitle(note.title);
+  //     if (note.cover_type)
+  //       setCover({ type: note.cover_type, value: note.cover_value });
+  //     editor.commands.setContent(JSON.parse(note.content));
+  //   };
+  //   window.addEventListener("note-updated", refresh);
+  //   return () => window.removeEventListener("note-updated", refresh);
+  // }, [id, editor, navigate]);
 
   useEffect(() => {
     (async () => {
@@ -97,7 +103,10 @@ export default function EditNote() {
     : null;
 
   return (
-    <div className="h-screen flex flex-col bg-zinc-950 text-zinc-100 overflow-hidden">
+    <div
+      className="h-screen flex flex-col overflow-hidden"
+      style={{ backgroundColor: COLORS.bgPrimary, color: COLORS.textPrimary }}
+    >
       <Toolbar
         cover={cover}
         title={title}
@@ -123,9 +132,15 @@ export default function EditNote() {
               placeholder="Enter title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="absolute bottom-12.5 left-55 bg-transparent z-1 text-[40px] outline-0 font-bold flex-1 w-full"
+              className="absolute bottom-12.5 text-center truncate capitalize bg-transparent z-1 text-[40px] outline-0 font-bold flex-1 w-full filter drop-shadow-sm title px-10"
+              style={{ color: COLORS.textPrimary }}
             />
-            <div className="absolute inset-x-0 bottom-0 h-12 bg-linear-to-t from-zinc-950 to-transparent" />
+            <div
+              className="absolute inset-x-0 bottom-0 h-12"
+              style={{
+                background: `linear-gradient(to top, ${COLORS.bgPrimary}, transparent)`,
+              }}
+            />
           </div>
         )}
 

@@ -59,4 +59,9 @@ contextBridge.exposeInMainWorld("dbAPI", {
         ),
     setUnsavedChanges: (value) =>
         ipcRenderer.invoke("set-unsaved-changes", value),
+    getSettings: () => ipcRenderer.invoke("get-settings"),
+    updateSettings: (settings) => ipcRenderer.invoke("update-settings", settings),
+    restoreAllNotes: () => ipcRenderer.invoke("restore-all-notes"),
+    deleteAllNotes: () => ipcRenderer.invoke("delete-all-notes"),
+    getAppVersion: () => ipcRenderer.invoke("get-app-version"),
 });

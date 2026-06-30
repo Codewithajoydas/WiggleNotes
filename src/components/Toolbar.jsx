@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useContext, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import ToolbarButton from "./ui/toolbarButton";
 import { CoverPanel } from "./CoverPanel";
@@ -34,6 +34,8 @@ import {
   AlignJustify,
 } from "lucide-react";
 import Divider from "./ui/Divider";
+import { SettingsContext } from "../store/Settings.context";
+import { getThemeColors } from "../constants/Theme";
 /**
  * @function Toolbar
  * @description A toolbar for editing notes
@@ -102,8 +104,21 @@ export default function Toolbar({
       console.error(err);
     }
   }, [editor, noteId, title, cover]);
+
+  const { settings, setSettings } = useContext(SettingsContext);
+  const COLORS = useMemo(
+    () => getThemeColors(settings.theme, settings.accent_color),
+    [settings.theme, settings.accent_color],
+  );
+
   return (
-    <div className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-xl border-b border-zinc-900">
+    <div
+      className="sticky top-0 z-50  backdrop-blur-xl border-b "
+      style={{
+        backgroundColor: COLORS.bgSecondary,
+        borderColor: COLORS.border,
+      }}
+    >
       {/* Top row: title + meta actions */}
       <div className="flex items-center gap-2 px-4 pt-3 pb-1 pr-[150px]">
         <button
@@ -115,12 +130,21 @@ export default function Toolbar({
                        flex
                        items-center
                        justify-center
-                       text-zinc-400
-                       hover:bg-zinc-800
-                       hover:text-blue-400
                        transition-all
                        duration-200
                      "
+          title="Go back"
+          style={{
+            color: COLORS.textPrimary,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = COLORS.bgHover;
+            e.currentTarget.style.color = COLORS.accent;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "transparent";
+            e.currentTarget.style.color = COLORS.textPrimary;
+          }}
         >
           <ArrowLeft size={18} />
         </button>
@@ -130,7 +154,10 @@ export default function Toolbar({
           placeholder="Untitled Note"
           onChange={(e) => setTitle(e.target.value)}
           disabled={!editable}
-          className="flex-1 min-w-0 text-base font-semibold bg-transparent text-zinc-100 placeholder:text-zinc-600 outline-none w-full "
+          className="flex-1 min-w-0 text-base font-semibold bg-transparent  placeholder:text-zinc-600 outline-none w-full truncate capitalize "
+          style={{
+            color: COLORS.textPrimary,
+          }}
         />
         <div className="flex items-center gap-1 shrink-0">
           {/* Cover settings */}

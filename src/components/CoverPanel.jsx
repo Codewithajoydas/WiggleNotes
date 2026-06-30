@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from "react";
-
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { X, Layers, Sun, Image as ImageIcon, Palette } from "lucide-react";
-
 import { unsplash } from "../api/unsplash";
+import { SettingsContext } from "../store/Settings.context";
+import { getThemeColors } from "../constants/Theme";
 
 // ─── Cover Presets ────────────────────────────────────────────────────────────
 const SOLID_COLORS = [
@@ -49,6 +49,8 @@ export function CoverPanel({ cover, onChange, onClose, imageInputRef }) {
   const [images, setImages] = useState([]);
   const [query, setQuery] = useState("nature");
   const [loading, setLoading] = useState(false);
+  const [removeHover, setRemoveHover] = useState(false);
+
   const categories = [
     "Nature",
     "Mountain",
@@ -59,6 +61,7 @@ export function CoverPanel({ cover, onChange, onClose, imageInputRef }) {
     "Dark",
     "Abstract",
   ];
+
   const searchImages = async (search = query) => {
     setLoading(true);
 
@@ -76,117 +79,155 @@ export function CoverPanel({ cover, onChange, onClose, imageInputRef }) {
     }
   };
 
+  const { settings } = useContext(SettingsContext);
+  const COLORS = useMemo(
+    () => getThemeColors(settings.theme, settings.accent_color),
+    [settings.theme, settings.accent_color],
+  );
+
   useEffect(() => {
     searchImages("nature");
   }, []);
-    
-    useEffect(() => {
-      const handleClickOutside = (event) => {
-        if (panelRef.current && !panelRef.current.contains(event.target)) {
-          onClose();
-        }
-      };
 
-      const handleKeyDown = (event) => {
-        if (event.key === "Escape") {
-          onClose();
-        }
-      };
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (panelRef.current && !panelRef.current.contains(event.target)) {
+        onClose();
+      }
+    };
 
-      document.addEventListener("mousedown", handleClickOutside);
-      document.addEventListener("keydown", handleKeyDown);
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
 
-      return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-        document.removeEventListener("keydown", handleKeyDown);
-      };
-    }, [onClose]);
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onClose]);
+
   return (
     <div
       ref={panelRef}
-      className="absolute top-14 right-4 z-50 w-80 rounded-2xl bg-zinc-900 border border-zinc-800 shadow-2xl shadow-black/60 overflow-hidden"
+      className="absolute top-14 right-4 z-50 w-80 rounded-2xl shadow-2xl shadow-black/60 overflow-hidden"
+      style={{
+        backgroundColor: COLORS.bgSecondary,
+        border: `1px solid ${COLORS.border}`,
+      }}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
-        <span className="text-sm font-semibold text-zinc-100 tracking-wide">
+      <div
+        className="flex items-center justify-between px-4 py-3 border-b"
+        style={{ borderColor: COLORS.border }}
+      >
+        <span
+          className="text-sm font-semibold tracking-wide"
+          style={{ color: COLORS.textPrimary }}
+        >
           Cover Settings
         </span>
         <button
           onClick={onClose}
-          className="text-zinc-500 hover:text-zinc-300 transition-colors"
+          className="transition-colors"
+          style={{ color: COLORS.textMuted }}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.color = COLORS.textPrimary)
+          }
+          onMouseLeave={(e) => (e.currentTarget.style.color = COLORS.textMuted)}
         >
           <X size={16} />
         </button>
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-zinc-800">
+      <div className="flex border-b" style={{ borderColor: COLORS.border }}>
         {[
           { id: "gradient", icon: <Layers size={13} />, label: "Gradient" },
           { id: "solid", icon: <Sun size={13} />, label: "Solid" },
           { id: "image", icon: <ImageIcon size={13} />, label: "Image" },
-        ].map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium transition-colors ${
-              tab === t.id
-                ? "text-blue-400 border-b-2 border-blue-500"
-                : "text-zinc-500 hover:text-zinc-300"
-            }`}
-          >
-            {t.icon}
-            {t.label}
-          </button>
-        ))}
+        ].map((t) => {
+          const isActive = tab === t.id;
+          return (
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium transition-colors border-b-2"
+              style={{
+                color: isActive ? COLORS.accent : COLORS.textMuted,
+                borderColor: isActive ? COLORS.accent : "transparent",
+              }}
+              onMouseEnter={(e) => {
+                if (!isActive) e.currentTarget.style.color = COLORS.textPrimary;
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) e.currentTarget.style.color = COLORS.textMuted;
+              }}
+            >
+              {t.icon}
+              {t.label}
+            </button>
+          );
+        })}
       </div>
 
       <div className="p-4">
         {/* Gradient tab */}
         {tab === "gradient" && (
           <div className="grid grid-cols-3 gap-2">
-            {GRADIENTS.map((g) => (
-              <button
-                key={g.label}
-                onClick={() => onChange({ type: "gradient", value: g.value })}
-                className={`relative h-14 rounded-xl overflow-hidden ring-2 transition-all ${
-                  cover?.value === g.value
-                    ? "ring-blue-500 scale-95"
-                    : "ring-transparent hover:ring-zinc-600"
-                }`}
-                style={{ background: g.value }}
-                title={g.label}
-              >
-                <span className="absolute inset-x-0 bottom-0 pb-1 text-[10px] text-white/70 text-center font-medium">
-                  {g.label}
-                </span>
-              </button>
-            ))}
+            {GRADIENTS.map((g) => {
+              const isSelected = cover?.value === g.value;
+              return (
+                <button
+                  key={g.label}
+                  onClick={() => onChange({ type: "gradient", value: g.value })}
+                  className="relative h-14 rounded-xl overflow-hidden ring-2 transition-all"
+                  style={{
+                    background: g.value,
+                    ringColor: isSelected ? COLORS.accent : "transparent",
+                    transform: isSelected ? "scale(0.95)" : "scale(1)",
+                  }}
+                  title={g.label}
+                >
+                  <span className="absolute inset-x-0 bottom-0 pb-1 text-[10px] text-white/70 text-center font-medium">
+                    {g.label}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         )}
 
         {/* Solid tab */}
         {tab === "solid" && (
           <div className="grid grid-cols-4 gap-2">
-            {SOLID_COLORS.map((c) => (
-              <button
-                key={c.label}
-                onClick={() => onChange({ type: "solid", value: c.value })}
-                className={`h-12 rounded-xl ring-2 transition-all ${
-                  cover?.value === c.value
-                    ? "ring-blue-500 scale-95"
-                    : "ring-transparent hover:ring-zinc-600"
-                }`}
-                style={{ background: c.value }}
-                title={c.label}
-              />
-            ))}
+            {SOLID_COLORS.map((c) => {
+              const isSelected = cover?.value === c.value;
+              return (
+                <button
+                  key={c.label}
+                  onClick={() => onChange({ type: "solid", value: c.value })}
+                  className="h-12 rounded-xl ring-2 transition-all"
+                  style={{
+                    background: c.value,
+                    ringColor: isSelected ? COLORS.accent : "transparent",
+                    transform: isSelected ? "scale(0.95)" : "scale(1)",
+                  }}
+                  title={c.label}
+                />
+              );
+            })}
             {/* Custom color picker */}
             <label
-              className="h-12 rounded-xl ring-2 ring-transparent hover:ring-zinc-600 flex items-center justify-center cursor-pointer bg-zinc-800 transition-all"
+              className="h-12 rounded-xl ring-2 ring-transparent flex items-center justify-center cursor-pointer transition-all"
+              style={{ backgroundColor: COLORS.bgHover }}
               title="Custom color"
             >
-              <Palette size={16} className="text-zinc-400" />
+              <Palette size={16} style={{ color: COLORS.textMuted }} />
               <input
                 type="color"
                 className="sr-only"
@@ -210,11 +251,21 @@ export function CoverPanel({ cover, onChange, onClose, imageInputRef }) {
                 }
               }}
               placeholder="Search photos..."
-              className="w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 outline-none text-sm"
+              className="w-full px-3 py-2 rounded-lg outline-none text-sm"
+              style={{
+                backgroundColor: COLORS.bgHover,
+                border: `1px solid ${COLORS.border}`,
+                color: COLORS.textPrimary,
+              }}
             />
 
             {loading && (
-              <div className="text-center text-zinc-500 py-5">Loading...</div>
+              <div
+                className="text-center py-5"
+                style={{ color: COLORS.textMuted }}
+              >
+                Loading...
+              </div>
             )}
 
             <div className="grid grid-cols-3 gap-2 max-h-72 overflow-y-auto">
@@ -227,7 +278,20 @@ export function CoverPanel({ cover, onChange, onClose, imageInputRef }) {
                       value: image.urls.regular,
                     })
                   }
-                  className="aspect-square overflow-hidden rounded-lg ring-2 ring-transparent hover:ring-blue-500"
+                  className="aspect-square overflow-hidden rounded-lg ring-2 transition-all"
+                  style={{ ringColor: "transparent" }}
+                  onMouseEnter={(e) =>
+                    e.currentTarget.style.setProperty(
+                      "--tw-ring-color",
+                      COLORS.accent,
+                    )
+                  }
+                  onMouseLeave={(e) =>
+                    e.currentTarget.style.setProperty(
+                      "--tw-ring-color",
+                      "transparent",
+                    )
+                  }
                 >
                   <img
                     src={image.urls.small}
@@ -246,7 +310,16 @@ export function CoverPanel({ cover, onChange, onClose, imageInputRef }) {
         <div className="px-4 pb-4">
           <button
             onClick={() => onChange(null)}
-            className="w-full py-2 rounded-xl text-xs text-zinc-500 hover:text-red-400 hover:bg-zinc-800 transition-colors border border-zinc-800"
+            onMouseEnter={() => setRemoveHover(true)}
+            onMouseLeave={() => setRemoveHover(false)}
+            className="w-full py-2 rounded-xl text-xs transition-colors"
+            style={{
+              color: removeHover ? "#f87171" : COLORS.textMuted,
+              border: `1px solid ${COLORS.border}`,
+              backgroundColor: removeHover
+                ? "rgba(248,113,113,0.08)"
+                : "transparent",
+            }}
           >
             Remove cover
           </button>

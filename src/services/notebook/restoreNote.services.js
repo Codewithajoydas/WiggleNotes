@@ -1,4 +1,5 @@
-const restoreNote = async (id) => {
+
+  const restoreNote = async (id) => {
   try {
     const result = await window.dbAPI.restoreNote(id);
     return result;
