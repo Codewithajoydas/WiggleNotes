@@ -1,4 +1,6 @@
-# WiggleNote
+
+
+# <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/0c83e627-ac3a-4da0-a52e-92e3744bfdb3" /> WiggleNote 
 
 WiggleNote is a desktop notebook built for people who write a lot of notes and don't want a complicated workspace.
 
@@ -8,7 +10,6 @@ Just open the app and start writing.
 
 The app stores everything locally using SQLite, so your notes remain on your machine and are available even without an internet connection.
 
----
 
 ## What You Can Do
 
@@ -21,7 +22,6 @@ The app stores everything locally using SQLite, so your notes remain on your mac
 * Add headings, lists, code blocks, tables and images
 * Organize notes without leaving the keyboard
 
----
 
 ## Editor Features
 
@@ -41,7 +41,6 @@ The editor supports:
 * Code Blocks
 * Horizontal Rules
 
----
 
 ## Built With
 
@@ -52,7 +51,6 @@ The editor supports:
 * SQLite
 * better-sqlite3
 
----
 
 ## Running Locally
 
@@ -74,7 +72,6 @@ Run Electron:
 npm start
 ```
 
----
 
 ## Current Features
 
@@ -89,7 +86,6 @@ npm start
 * Settings Page
 * Local Database Storage
 
----
 
 ## Planned
 
@@ -100,7 +96,6 @@ npm start
 * Keyboard Shortcuts
 * Automatic Backups
 
----
 
 ## Why I Built This
 
