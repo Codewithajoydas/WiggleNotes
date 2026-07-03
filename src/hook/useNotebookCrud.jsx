@@ -1,8 +1,33 @@
-import { useCallback, useContext, useEffect, useRef } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import createNote from "../services/notebook/createNote.services";
 import updateNote from "../services/notebook/updateNote.services";
 import checkSaved from "../services/notebook/checkSaved";
 import { SettingsContext } from "../store/Settings.context";
+
+// Max characters for an auto-detected title (first line of the note can be
+// arbitrarily long if the user never presses Enter, so it must be capped).
+const AUTO_TITLE_MAX_LEN = 80;
+
+/**
+ * Derives a safe title from raw editor text: takes the first non-empty line,
+ * then truncates to AUTO_TITLE_MAX_LEN characters at the nearest word
+ * boundary (falls back to a hard cut if there's no space to break on).
+ */
+function extractAutoTitle(editorText) {
+  const firstLine =
+    editorText
+      .trim()
+      .split("\n")
+      .find((line) => line.trim()) || "";
+
+  if (!firstLine) return "Untitled Note";
+  if (firstLine.length <= AUTO_TITLE_MAX_LEN) return firstLine;
+
+  const truncated = firstLine.slice(0, AUTO_TITLE_MAX_LEN);
+  const lastSpace = truncated.lastIndexOf(" ");
+  const base = lastSpace > 0 ? truncated.slice(0, lastSpace) : truncated;
+  return `${base}…`;
+}
 
 /**
  * useNotebookCRUD
@@ -10,6 +35,9 @@ import { SettingsContext } from "../store/Settings.context";
  * Handles the full note lifecycle:
  *  - First save   → createNote, stores returned id
  *  - Subsequent   → updateNote (autosave on editor change, title/cover change, Ctrl+S)
+ *  - Title        → if the user hasn't typed a title, it's auto-detected
+ *                    from the first non-empty line of the editor as they type,
+ *                    capped at AUTO_TITLE_MAX_LEN characters
  *
  * @param {object} params
  * @param {import('@tiptap/react').Editor} params.editor     - Tiptap editor instance
@@ -34,9 +62,18 @@ export default function useNotebookCRUD({
   // Keep a stable ref so callbacks always see the latest noteId
   // without needing it in every dependency array
   const noteIdRef = useRef(noteId);
+  const [title_a, setTitle] = useState(title);
   useEffect(() => {
     noteIdRef.current = noteId;
   }, [noteId]);
+
+  // Ref mirror of the current title prop, read inside the editor "update"
+  // listener so that effect doesn't need to re-subscribe on every keystroke.
+  const titleRef = useRef(title);
+  useEffect(() => {
+    titleRef.current = title;
+    setTitle(title); // keep title_a in sync if parent updates title directly
+  }, [title]);
 
   const saveTimeout = useRef(null);
 
@@ -52,13 +89,20 @@ export default function useNotebookCRUD({
   // ─── helpers ────────────────────────────────────────────────────────────────
 
   const buildPayload = useCallback(
-    (id = null) => ({
-      ...(id ? { id } : {}),
-      title: title.trim() || "Untitled Note",
-      content: JSON.stringify(editor.getJSON()),
-      cover_type: cover?.type ?? null,
-      cover_value: cover?.value ?? null,
-    }),
+    (id = null) => {
+      const autoTitle = extractAutoTitle(editor.getText());
+
+      const normalizedTitle =
+        title.trim() === "Untitled Note" ? "" : title.trim();
+
+      return {
+        ...(id ? { id } : {}),
+        title: normalizedTitle || autoTitle,
+        content: JSON.stringify(editor.getJSON()),
+        cover_type: cover?.type ?? null,
+        cover_value: cover?.value ?? null,
+      };
+    },
     [editor, title, cover],
   );
 
@@ -130,12 +174,24 @@ export default function useNotebookCRUD({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [save, create]);
 
-  // ─── editor content change → autosave ───────────────────────────────────────
+  // ─── auto-detect title from first line (length-capped) ─────────────────────
+
+  const auto_detect_title = useCallback(() => {
+    setTitle(extractAutoTitle(editor.getText()));
+  }, [editor]);
+
+  // ─── editor content change → autosave + title auto-detect ──────────────────
 
   useEffect(() => {
     if (!editor) return;
     const onUpdate = () => {
       setSaved(false);
+
+      // Only auto-detect the title while the user hasn't typed one themselves.
+      if (!titleRef.current || !titleRef.current.trim()) {
+        auto_detect_title();
+      }
+
       if (noteIdRef.current && isAutoSaveOn) {
         debouncedSave();
       }
@@ -146,7 +202,7 @@ export default function useNotebookCRUD({
       clearTimeout(saveTimeout.current);
       editor.off("update", onUpdate);
     };
-  }, [editor, debouncedSave, setSaved]); // isAutoSaveOn removed, checked via ref inside
+  }, [editor, debouncedSave, setSaved, auto_detect_title]); // isAutoSaveOn checked via closure, titleRef via ref
 
   // ─── title / cover change → autosave ────────────────────────────────────────
 
@@ -159,5 +215,5 @@ export default function useNotebookCRUD({
 
   // ─── public API ─────────────────────────────────────────────────────────────
 
-  return { create, save };
+  return { create, save, auto_detect_title, title_a };
 }

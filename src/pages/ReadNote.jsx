@@ -431,9 +431,9 @@ export default function ReadNote() {
         {/* ── Cover ── */}
         {note.cover_type && (
           <Cover type={note.cover_type} value={note.cover_value}>
-            <div className="left-55 absolute bottom-3">
+            <div className="absolute bottom-3 left-55 right-8">
               <h1
-                className={`font-bold text-white mb-1 leading-snug drop-shadow-md  title`}
+                className={`font-bold text-white mb-1 leading-snug drop-shadow-md truncate title`}
               >
                 {note.title || "Untitled"}
               </h1>
@@ -513,7 +513,7 @@ export default function ReadNote() {
 
         {/* ── Editor ── */}
         <div className="max-w-3xl mx-auto px-8 py-8">
-          <EditorContent 
+          <EditorContent
             editor={editor}
             spellCheck={!!settings.spell_check}
             className={`

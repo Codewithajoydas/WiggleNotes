@@ -9,12 +9,23 @@ import useNoteImage from "../hook/useNoteImage";
 import checkSaved from "../services/notebook/checkSaved";
 import { SettingsContext } from "../store/Settings.context";
 import { getThemeColors } from "../constants/Theme";
+import { useSearchParams } from "react-router-dom";
+import { templates } from "../../public/templates";
+import { marked } from "marked";
+
+const loadTemplates = (id) => {
+  const response = templates.find((template) => template.id === id);
+  return response;
+};
 
 export default function CreateNote() {
+  const [searchParams] = useSearchParams();
+  const id = searchParams.get("id");
+  const [temLoading, setTemLoading] = useState(false);
   const [noteId, setNoteId] = useState(null);
   const [editable, setEditable] = useState(true);
   const [alert, setAlert] = useState(null);
-  const [title, setTitle] = useState("Untitled Note");
+  const [title, setTitle] = useState("");
   const [cover, setCover] = useState(null);
   const [showCoverPanel, setShowCoverPanel] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -31,7 +42,28 @@ export default function CreateNote() {
     spellcheck: Boolean(Number(settings?.spell_check)),
   });
 
-  const { create } = useNotebookCRUD({
+  // ---- Load template -------
+  useEffect(() => {
+    if (!editor || !id) return;
+    setTemLoading(true);
+    const template = loadTemplates(id);
+    if (!template) {
+      setTemLoading(false);
+      return;
+    }
+    const html = marked.parse(template.content);
+    editor.commands.setContent(html, false);
+    setTitle(template.title);
+    if (template.cover) {
+      setCover({
+        type: "image",
+        value: template.cover,
+      });
+    }
+    setTemLoading(false);
+  }, [editor, id]);
+
+  const { create, title_a } = useNotebookCRUD({
     editor,
     noteId,
     title,
@@ -61,6 +93,19 @@ export default function CreateNote() {
       : { background: cover.value }
     : null;
 
+  if (temLoading) {
+    return (
+      <div className="h-screen flex flex-col items-center justify-center">
+        <div
+          className="animate-spin rounded-full h-16 w-16 border-b-2"
+          style={{
+            borderColor: COLORS.accent,
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div
       className="h-screen flex flex-col overflow-hidden"
@@ -68,7 +113,7 @@ export default function CreateNote() {
     >
       <Toolbar
         cover={cover}
-        title={title}
+        title={title || title_a}
         setTitle={setTitle}
         editable={editable}
         editor={editor}

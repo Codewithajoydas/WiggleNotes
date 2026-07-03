@@ -8,21 +8,25 @@ export const templates = [
         cover: "https://images.unsplash.com/photo-1506880018603-83d5b814b5a6?w=800&q=80",
         content: `# Daily Journal
 
+![Daily journal](https://picsum.photos/seed/daily-journal/800/360)
+
 **Date:** <!-- e.g. Monday, June 24 -->
-**Mood:** <!-- 😊 Happy / 😐 Neutral / 😔 Low / 😤 Frustrated / 😴 Tired -->
+**Mood:** <!-- 😊 Happy · 😐 Neutral · 😔 Low · 😤 Frustrated · 😴 Tired -->
 **Energy Level:** <!-- 1–10 -->
+
+> 💡 **Tip:** Journaling for even 5 minutes at the same time each day builds the habit faster than long, irregular entries.
 
 ---
 
 ## Morning Check-In
 
-_How did you start the day? Note your initial thoughts, intentions, or anything on your mind when you woke up._
+_How did you start the day? Capture your first thoughts, intentions, or anything already on your mind._
 
 ## What Happened Today
 
-_Write a brief account of the main events, conversations, tasks, or moments that defined your day._
+_A brief account of the key events, conversations, and tasks that shaped your day._
 
-## Highlights
+## Wins & Highlights
 
 - 
 - 
@@ -30,11 +34,11 @@ _Write a brief account of the main events, conversations, tasks, or moments that
 
 ## Challenges
 
-_Describe any difficulties, frustrations, or setbacks you encountered._
+_What was difficult, frustrating, or didn't go as planned — and how did you handle it?_
 
-## What I Learned or Noticed
+## Lessons & Realizations
 
-_Did you pick up a new insight, observe something interesting, or have a realization?_
+_Any new insight, observation, or "aha" moment worth remembering?_
 
 ## Gratitude
 
@@ -53,11 +57,11 @@ _Did you pick up a new insight, observe something interesting, or have a realiza
 
 ## Tomorrow's Intention
 
-_One sentence describing how you want to show up tomorrow._
+_One sentence: how do you want to show up tomorrow?_
 
 ## Free Thoughts
 
-_Anything that doesn't fit above — worries, random ideas, stream of consciousness._
+_Anything else — worries, random ideas, stream of consciousness._
 `,
     },
     {
@@ -68,9 +72,13 @@ _Anything that doesn't fit above — worries, random ideas, stream of consciousn
         cover: "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=800&q=80",
         content: `# Morning Routine
 
+![Morning routine](https://picsum.photos/seed/morning-routine/800/360)
+
 **Date:** 
 **Wake-up Time:** 
 **Target Bedtime Last Night:** 
+
+> 💡 **Tip:** Stack new habits onto ones you already do automatically (e.g. "after I brush my teeth, I drink a glass of water").
 
 ---
 
@@ -105,8 +113,12 @@ _Anything that doesn't fit above — worries, random ideas, stream of consciousn
         cover: "https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=800&q=80",
         content: `# Weekly Review
 
+![Weekly review](https://picsum.photos/seed/weekly-review/800/360)
+
 **Week of:** 
 **Overall Rating:** /10
+
+> 💡 **Tip:** Do this same day every week (e.g. Sunday evening) so it becomes a ritual, not a chore.
 
 ---
 
@@ -157,7 +169,11 @@ _One or two sentences capturing the most important insight of the week._
         cover: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800&q=80",
         content: `# Bucket List
 
+![Bucket list adventure](https://picsum.photos/seed/bucket-list/800/360)
+
 _Last updated:_ 
+
+> 💡 **Tip:** Turn one vague item into a concrete plan each quarter — a date, a budget, a first booking.
 
 ---
 
@@ -207,6 +223,10 @@ _Last updated:_
         cover: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800&q=80",
         content: `# Reading Log
 
+![Stack of books](https://picsum.photos/seed/reading-log/800/360)
+
+> 💡 **Tip:** Write one takeaway per book within a day of finishing it — that's when retention is highest.
+
 ---
 
 ## Currently Reading
@@ -254,10 +274,14 @@ _Last updated:_
         cover: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&q=80",
         content: `# Project Kickoff
 
+![Project kickoff whiteboard](https://picsum.photos/seed/project-kickoff/800/360)
+
 **Project Name:** 
 **Owner:** 
 **Start Date:** 
 **Target Launch:** 
+
+> 💡 **Tip:** A tight problem statement (2–3 sentences) prevents scope creep more than any planning doc.
 
 ---
 
@@ -311,9 +335,13 @@ _What problem are we solving, and for whom?_
         cover: "https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=800&q=80",
         content: `# Product Roadmap
 
+![Product roadmap planning](https://picsum.photos/seed/product-roadmap/800/360)
+
 **Product:** 
 **Version:** 
 **Last Updated:** 
+
+> 💡 **Tip:** Roadmaps age fast — timestamp every update so viewers know how fresh it is.
 
 ---
 
@@ -355,9 +383,13 @@ _What problem are we solving, and for whom?_
         cover: "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=800&q=80",
         content: `# Sprint Planning
 
+![Sprint planning board](https://picsum.photos/seed/sprint-planning/800/360)
+
 **Sprint #:** 
 **Dates:** — 
 **Team Capacity:** <!-- Story points or hours available -->
+
+> 💡 **Tip:** Only commit to ~80% of measured capacity — leave room for interruptions and bugs.
 
 ---
 
@@ -394,10 +426,14 @@ _What problem are we solving, and for whom?_
         cover: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80",
         content: `# Event Planner
 
+![Event planning table](https://picsum.photos/seed/event-planner/800/360)
+
 **Event Name:** 
 **Date & Time:** 
 **Venue:** 
 **Expected Guests:** 
+
+> 💡 **Tip:** Add a 15% buffer to every budget line — vendors almost always run over.
 
 ---
 
@@ -450,8 +486,12 @@ _What problem are we solving, and for whom?_
         cover: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80",
         content: `# OKRs — Q_ 20__
 
+![OKR planning](https://picsum.photos/seed/okr-template/800/360)
+
 **Team / Individual:** 
 **Period:** 
+
+> 💡 **Tip:** Good key results are measurable numbers, not tasks — "increase X from 10 to 25" not "work on X".
 
 ---
 
@@ -498,11 +538,15 @@ _What problem are we solving, and for whom?_
         cover: "https://images.unsplash.com/photo-1555099962-4199c345e5dd?w=800&q=80",
         content: `# Bug Report
 
+![Debugging code](https://picsum.photos/seed/bug-report/800/360)
+
 **ID:** BUG-
 **Severity:** 🔴 Critical / 🟡 Major / 🟢 Minor
 **Reporter:** 
 **Date:** 
 **Assigned To:** 
+
+> 💡 **Tip:** A reproducible bug is a solved bug — spend the extra 2 minutes writing exact steps.
 
 ---
 
@@ -547,10 +591,14 @@ _One-line description of the bug._
         cover: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&q=80",
         content: `# API Design — {{Service Name}}
 
+![API architecture](https://picsum.photos/seed/api-design/800/360)
+
 **Version:** v1
 **Base URL:** \`https://api.example.com/v1\`
 **Auth:** Bearer Token (JWT)
 **Last Updated:** 
+
+> 💡 **Tip:** Document error responses as thoroughly as success ones — that's what integrators actually need at 2am.
 
 ---
 
@@ -625,10 +673,14 @@ _One-line description of the bug._
         cover: "https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&q=80",
         content: `# Code Review Checklist
 
+![Code review](https://picsum.photos/seed/code-review/800/360)
+
 **PR / MR:** #
 **Author:** 
 **Reviewer:** 
 **Date:** 
+
+> 💡 **Tip:** Review for intent first, style second — a linter can catch formatting, only a human catches wrong logic.
 
 ---
 
@@ -675,9 +727,13 @@ _One-line description of the bug._
         cover: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80",
         content: `# ADR-{{number}}: {{Title}}
 
+![Software architecture diagram](https://picsum.photos/seed/architecture-decision/800/360)
+
 **Date:** 
 **Status:** Proposed / Accepted / Deprecated / Superseded
 **Deciders:** 
+
+> 💡 **Tip:** Future-you will thank present-you for writing down the *rejected* options, not just the chosen one.
 
 ---
 
@@ -719,10 +775,14 @@ _What is the change we're proposing and/or doing?_
         cover: "https://images.unsplash.com/photo-1510915228340-29c85a43dcfe?w=800&q=80",
         content: `# Deployment Checklist
 
+![Deployment pipeline](https://picsum.photos/seed/deployment-checklist/800/360)
+
 **Version:** 
 **Environment:** Staging / Production
 **Deployer:** 
 **Date:** 
+
+> 💡 **Tip:** Never write your rollback plan *during* an incident — draft it here, calmly, in advance.
 
 ---
 
@@ -769,10 +829,14 @@ _Steps to revert if something goes wrong:_
         cover: "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?w=800&q=80",
         content: `# Feature Spec: {{Feature Name}}
 
+![Product spec whiteboard](https://picsum.photos/seed/feature-spec/800/360)
+
 **Author:** 
 **Date:** 
 **Status:** Draft / Review / Approved
 **JIRA/GitHub Issue:** 
+
+> 💡 **Tip:** Write acceptance criteria as testable statements — if QA can't turn it into a test case, it's too vague.
 
 ---
 
@@ -831,8 +895,12 @@ _High-level description of the feature._
         cover: "https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=800&q=80",
         content: `# Database Schema — {{Service/Module}}
 
+![Database schema diagram](https://picsum.photos/seed/database-schema/800/360)
+
 **DB Type:** PostgreSQL / MongoDB / MySQL
 **Last Updated:** 
+
+> 💡 **Tip:** Index columns you filter or join on often — but every index adds write overhead, so don't over-index.
 
 ---
 
@@ -877,9 +945,13 @@ posts (1) ──< comments (many)
         cover: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&q=80",
         content: `# Dev Environment Setup
 
+![Developer workspace](https://picsum.photos/seed/env-setup/800/360)
+
 **Project:** 
 **Last Updated:** 
 **OS:** Windows (WSL2) / macOS / Linux
+
+> 💡 **Tip:** Test this doc on a brand-new machine (or VM) once a quarter — setup guides rot fast.
 
 ---
 
@@ -949,11 +1021,15 @@ App runs at: \`http://localhost:3000\`
         cover: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80",
         content: `# Meeting Notes
 
+![Team meeting](https://picsum.photos/seed/meeting-notes/800/360)
+
 **Meeting:** 
 **Date & Time:** 
 **Location / Link:** 
 **Facilitator:** 
 **Note-taker:** 
+
+> 💡 **Tip:** No agenda, no meeting — if you can't fill the Agenda section, question whether it needs to happen.
 
 ---
 
@@ -1006,9 +1082,13 @@ App runs at: \`http://localhost:3000\`
         cover: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&q=80",
         content: `# 1-on-1 — {{Name}}
 
+![One on one conversation](https://picsum.photos/seed/one-on-one/800/360)
+
 **Date:** 
 **My Role:** 
 **Their Role:** 
+
+> 💡 **Tip:** Let the other person's updates come first — a 1-on-1 that's only status reporting wastes its real value.
 
 ---
 
@@ -1059,8 +1139,12 @@ _Any goals, aspirations, or development areas to discuss?_
         cover: "https://images.unsplash.com/photo-1573497019236-61f323342eb9?w=800&q=80",
         content: `# Daily Standup
 
+![Daily standup meeting](https://picsum.photos/seed/standup/800/360)
+
 **Date:** 
 **Team:** 
+
+> 💡 **Tip:** Keep it to 3 lines per person — anything longer belongs in a separate discussion, not the standup.
 
 ---
 
@@ -1110,9 +1194,13 @@ _Any goals, aspirations, or development areas to discuss?_
         cover: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80",
         content: `# Sprint Retrospective — Sprint #{{n}}
 
+![Team retrospective](https://picsum.photos/seed/retrospective/800/360)
+
 **Date:** 
 **Facilitator:** 
 **Team:** 
+
+> 💡 **Tip:** Pick just 1–2 action items to actually pursue — retros that generate 10 action items rarely finish any of them.
 
 ---
 
@@ -1159,11 +1247,15 @@ _Any goals, aspirations, or development areas to discuss?_
         cover: "https://images.unsplash.com/photo-1565688534245-05d6b5be184a?w=800&q=80",
         content: `# Interview Notes
 
+![Job interview](https://picsum.photos/seed/interview-notes/800/360)
+
 **Candidate:** 
 **Role:** 
 **Date:** 
 **Interviewer(s):** 
 **Format:** Phone / Video / On-site
+
+> 💡 **Tip:** Score immediately after the interview — memory of specifics fades within an hour.
 
 ---
 
@@ -1224,11 +1316,15 @@ _Brief summary from resume._
         cover: "https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80",
         content: `# Blog Post Draft
 
+![Writing a blog post](https://picsum.photos/seed/blog-post/800/360)
+
 **Topic:** 
 **Target Keyword:** 
 **Word Count Goal:** 
 **Target Audience:** 
 **Call to Action:** 
+
+> 💡 **Tip:** Write your headline last — you'll know the real angle only after drafting the body.
 
 ---
 
@@ -1284,9 +1380,13 @@ _Brief summary from resume._
         cover: "https://images.unsplash.com/photo-1586339949216-35c2747cc36d?w=800&q=80",
         content: `# Newsletter — Issue #{{n}}
 
+![Newsletter layout](https://picsum.photos/seed/newsletter/800/360)
+
 **Subject Line:** 
 **Send Date:** 
 **Estimated Read Time:** min
+
+> 💡 **Tip:** Subject lines under 50 characters render fully on most mobile inboxes — write for that constraint.
 
 ---
 
@@ -1344,9 +1444,13 @@ _A question for readers, or a thought to leave them with._
         cover: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80",
         content: `# Case Study: {{Client / Project Name}}
 
+![Case study results](https://picsum.photos/seed/case-study/800/360)
+
 **Industry:** 
 **Company Size:** 
 **Timeline:** 
+
+> 💡 **Tip:** Lead with the number that matters most — readers scan for results before they read the story.
 
 ---
 
@@ -1399,7 +1503,11 @@ _What did you build or do? Keep it concrete._
         cover: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=800&q=80",
         content: `# Press Release
 
+![Press announcement](https://picsum.photos/seed/press-release/800/360)
+
 **FOR IMMEDIATE RELEASE**
+
+> 💡 **Tip:** Answer who/what/when/where/why in the first paragraph — assume editors only read that far.
 
 ---
 
@@ -1436,9 +1544,13 @@ Phone:
         cover: "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=800&q=80",
         content: `# Social Content Calendar
 
+![Social media planning](https://picsum.photos/seed/social-content-calendar/800/360)
+
 **Month:** 
 **Platforms:** 
 **Goal:** 
+
+> 💡 **Tip:** Batch a week of captions in one sitting — context-switching between platforms kills output quality.
 
 ---
 
@@ -1484,6 +1596,10 @@ Phone:
         description: "Track income, expenses, and savings for the month.",
         cover: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&q=80",
         content: `# Monthly Budget — {{Month Year}}
+
+![Budget planning](https://picsum.photos/seed/monthly-budget/800/360)
+
+> 💡 **Tip:** Pay yourself first — move your savings amount out the moment income lands, before spending starts.
 
 ---
 
@@ -1544,9 +1660,13 @@ Phone:
         cover: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80",
         content: `# Invoice
 
+![Invoice document](https://picsum.photos/seed/invoice/800/360)
+
 **Invoice #:** INV-
 **Date:** 
 **Due Date:** 
+
+> 💡 **Tip:** Include your UPI/bank details directly on the invoice — clients pay faster when they don't have to ask.
 
 ---
 
@@ -1601,11 +1721,15 @@ _Payment due within 15 days. Late payments subject to 2% monthly interest._
         cover: "https://images.unsplash.com/photo-1579621970588-a35d0e7ab9b6?w=800&q=80",
         content: `# Expense Report
 
+![Business expenses](https://picsum.photos/seed/expense-report/800/360)
+
 **Employee:** 
 **Department:** 
 **Period:** 
 **Submitted On:** 
 **Manager:** 
+
+> 💡 **Tip:** Photograph receipts the moment you get them — faded thermal paper is unreadable within weeks.
 
 ---
 
@@ -1649,7 +1773,11 @@ _Payment due within 15 days. Late payments subject to 2% monthly interest._
         cover: "https://images.unsplash.com/photo-1434626881859-194d67b2b86f?w=800&q=80",
         content: `# Freelance Client Tracker
 
+![Freelance work tracking](https://picsum.photos/seed/freelance-tracker/800/360)
+
 **Year:** 
+
+> 💡 **Tip:** Track effective hourly rate (invoiced ÷ hours) per client — it exposes which clients are actually worth keeping.
 
 ---
 
@@ -1693,9 +1821,13 @@ _Payment due within 15 days. Late payments subject to 2% monthly interest._
         cover: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80",
         content: `# Research Notes — {{Topic}}
 
+![Research notes and sources](https://picsum.photos/seed/research-notes/800/360)
+
 **Date:** 
 **Researcher:** 
 **Goal:** _What question am I trying to answer?_
+
+> 💡 **Tip:** Rate source credibility as you go — it's much harder to judge reliability after you've forgotten the context.
 
 ---
 
@@ -1756,9 +1888,13 @@ _Payment due within 15 days. Late payments subject to 2% monthly interest._
         cover: "https://images.unsplash.com/photo-1559523161-0fc0d8b38a7a?w=800&q=80",
         content: `# Competitive Analysis
 
+![Market competitive landscape](https://picsum.photos/seed/competitive-analysis/800/360)
+
 **Product/Category:** 
 **Date:** 
 **Analyst:** 
+
+> 💡 **Tip:** Sign up for competitors' free tiers and newsletters — their own onboarding teaches you more than any review site.
 
 ---
 
@@ -1811,11 +1947,15 @@ _Draw or describe: X-axis = Price (Low → High), Y-axis = Feature Set (Basic �
         cover: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&q=80",
         content: `# User Interview
 
+![User research interview](https://picsum.photos/seed/user-interview/800/360)
+
 **Participant:** (anonymised if needed)
 **Date:** 
 **Interviewer:** 
 **Product / Feature:** 
 **Session Length:** 
+
+> 💡 **Tip:** Ask "tell me about the last time..." instead of "would you..." — past behaviour beats hypothetical opinion.
 
 ---
 
@@ -1878,8 +2018,12 @@ _Draw or describe: X-axis = Price (Low → High), Y-axis = Feature Set (Basic �
         cover: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
         content: `# SWOT Analysis — {{Subject}}
 
+![SWOT analysis grid](https://picsum.photos/seed/swot-analysis/800/360)
+
 **Date:** 
 **Analyst:** 
+
+> 💡 **Tip:** Strengths/weaknesses are about you today; opportunities/threats are about the world changing around you. Don't mix them up.
 
 ---
 
@@ -1942,10 +2086,14 @@ _What obstacles or risks exist externally?_
         cover: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80",
         content: `# Workout Log
 
+![Gym workout session](https://picsum.photos/seed/workout-log/800/360)
+
 **Date:** 
 **Type:** Strength / Cardio / HIIT / Yoga / Other
 **Duration:** min
 **Location:** Gym / Home / Outdoor
+
+> 💡 **Tip:** Log the exact weight/reps, not "felt good" — progressive overload only works if you can compare numbers.
 
 ---
 
@@ -1992,9 +2140,13 @@ _What obstacles or risks exist externally?_
         cover: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&q=80",
         content: `# Weekly Meal Plan
 
+![Healthy meal prep](https://picsum.photos/seed/meal-plan/800/360)
+
 **Week of:** 
 **Calorie Target:** kcal/day
 **Macro Split:** Protein: g | Carbs: g | Fat: g
+
+> 💡 **Tip:** Plan around 2–3 repeatable "anchor" meals — variety every single day is what makes meal planning collapse.
 
 ---
 
@@ -2044,7 +2196,11 @@ _What can I batch-cook on Sunday?_
         cover: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800&q=80",
         content: `# Mental Health Check-In
 
+![Calm quiet reflection](https://picsum.photos/seed/mental-health-check/800/360)
+
 **Date:** 
+
+> 💡 **Tip:** There's no "right" score here — the point is noticing change over time, not judging any single week.
 
 ---
 
@@ -2097,6 +2253,7 @@ _List anything causing stress or anxiety, without judgment._
 
 ## Notes
 
+_This template is for reflection, not diagnosis. If you're struggling, a licensed therapist or counsellor can offer support this page can't._
 `,
     },
     {
@@ -2106,6 +2263,10 @@ _List anything causing stress or anxiety, without judgment._
         description: "Track sleep duration, quality, and patterns over time.",
         cover: "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=800&q=80",
         content: `# Sleep Log
+
+![Sleep tracking](https://picsum.photos/seed/sleep-log/800/360)
+
+> 💡 **Tip:** Note caffeine/alcohol/screen time alongside sleep quality — patterns usually surface within 2 weeks.
 
 ---
 
@@ -2160,8 +2321,12 @@ _List anything causing stress or anxiety, without judgment._
         cover: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800&q=80",
         content: `# App Idea: {{Name}}
 
+![App idea sketch](https://picsum.photos/seed/app-idea/800/360)
+
 **Date:** 
 **Status:** Raw Idea / Validating / Building / Shipped
+
+> 💡 **Tip:** Talk to 10 real people before writing a line of code — the fastest way to kill a bad idea cheaply.
 
 ---
 
@@ -2231,9 +2396,13 @@ _Who has this problem? How are they solving it today?_
         cover: "https://images.unsplash.com/photo-1471107340929-a87cd0f5b5f3?w=800&q=80",
         content: `# Brainstorm — {{Topic}}
 
+![Brainstorming session](https://picsum.photos/seed/brainstorm/800/360)
+
 **Date:** 
 **Participants:** 
 **Time Box:** min
+
+> 💡 **Tip:** Set a hard timer for the raw idea dump — deadline pressure produces more ideas than open-ended time.
 
 ---
 
@@ -2294,10 +2463,14 @@ _Dump everything here first. Quantity over quality._
         cover: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&q=80",
         content: `# Design Brief — {{Project}}
 
+![Design moodboard](https://picsum.photos/seed/design-brief/800/360)
+
 **Client / Stakeholder:** 
 **Designer:** 
 **Date:** 
 **Deadline:** 
+
+> 💡 **Tip:** Collect 3–5 reference images before you open your design tool — it aligns everyone faster than words alone.
 
 ---
 
@@ -2360,10 +2533,14 @@ _How will we know the design has succeeded?_
         cover: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&q=80",
         content: `# Learning Notes — {{Topic}}
 
+![Studying and taking notes](https://picsum.photos/seed/learning-notes/800/360)
+
 **Source:** <!-- Book / Course / Video / Article -->
 **Author / Instructor:** 
 **Started:** 
 **Completed:** 
+
+> 💡 **Tip:** If you can't explain a concept simply in the summary section, you don't understand it yet — go back.
 
 ---
 
@@ -2418,10 +2595,14 @@ _Explain the whole topic in 3–5 simple sentences, as if teaching a beginner._
         cover: "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=800&q=80",
         content: `# Course Outline — {{Subject}}
 
+![Course curriculum planning](https://picsum.photos/seed/course-outline/800/360)
+
 **Goal:** By the end, I will be able to: 
 **Duration:** weeks
 **Time Commitment:** hrs/week
 **Start Date:** 
+
+> 💡 **Tip:** Put a project or capstone at the end of every module — passive video-watching without building rarely sticks.
 
 ---
 
@@ -2477,9 +2658,13 @@ _Explain the whole topic in 3–5 simple sentences, as if teaching a beginner._
         cover: "https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=800&q=80",
         content: `# Flashcard Set — {{Topic}}
 
+![Flashcards for studying](https://picsum.photos/seed/flashcard-set/800/360)
+
 **Subject:** 
 **Created:** 
 **Review Schedule:** Today → +1d → +3d → +7d → +14d
+
+> 💡 **Tip:** Write questions that force recall ("What causes X?"), not recognition ("Is X caused by Y?") — recall builds stronger memory.
 
 ---
 
@@ -2525,9 +2710,13 @@ _Explain the whole topic in 3–5 simple sentences, as if teaching a beginner._
         cover: "https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?w=800&q=80",
         content: `# Business Plan — {{Company Name}}
 
+![Business strategy planning](https://picsum.photos/seed/business-plan-one-pager/800/360)
+
 **Founded:** 
 **Founder(s):** 
 **Stage:** Idea / MVP / Revenue / Scaling
+
+> 💡 **Tip:** If you can't state your business model in one sentence, it's not clear enough to pitch yet.
 
 ---
 
@@ -2590,10 +2779,14 @@ _What are we looking for? (Funding, partnerships, customers)_
         cover: "https://images.unsplash.com/photo-1521791136064-7986c2920216?w=800&q=80",
         content: `# Proposal — {{Project Name}}
 
+![Client proposal document](https://picsum.photos/seed/client-proposal/800/360)
+
 **Prepared for:** 
 **Prepared by:** 
 **Date:** 
 **Valid Until:** 
+
+> 💡 **Tip:** Restate the client's problem in your own words before your solution — it proves you actually listened.
 
 ---
 
@@ -2658,8 +2851,12 @@ _By proceeding, {{Client Name}} agrees to the terms outlined above._
         cover: "https://images.unsplash.com/photo-1533750349088-cd871a92f312?w=800&q=80",
         content: `# Go-to-Market Plan — {{Product}}
 
+![Product launch strategy](https://picsum.photos/seed/go-to-market/800/360)
+
 **Launch Date:** 
 **Owner:** 
+
+> 💡 **Tip:** Pick 1–2 channels to go deep on for launch — spreading thin across 6 channels usually beats none of them.
 
 ---
 
@@ -2716,10 +2913,14 @@ _By proceeding, {{Client Name}} agrees to the terms outlined above._
         cover: "https://images.unsplash.com/photo-1507925921958-8a62f3d1a50d?w=800&q=80",
         content: `# SOP: {{Process Name}}
 
+![Standard operating procedure](https://picsum.photos/seed/sop/800/360)
+
 **Version:** 1.0
 **Owner:** 
 **Last Reviewed:** 
 **Frequency:** Daily / Weekly / Monthly / As needed
+
+> 💡 **Tip:** Write each step so someone with zero context could follow it without asking a question.
 
 ---
 
@@ -2782,9 +2983,13 @@ _Description of what to do and how._
         cover: "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&q=80",
         content: `# Job Application Tracker
 
+![Job search tracking](https://picsum.photos/seed/job-application-tracker/800/360)
+
 **Name:** 
 **Target Role:** 
 **Active Since:** 
+
+> 💡 **Tip:** Log the source of every application (referral, job board, cold outreach) — over time it shows you which channel actually converts.
 
 ---
 

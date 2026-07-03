@@ -253,7 +253,7 @@ body {
   font-size: 16px;
   line-height: 1.8;
   word-break: break-word;
-  caret-color: #3b82f6;
+  caret-color: var(--accent-hover);
   border-radius: 16px;
   -webkit-font-smoothing: antialiased;
 }
@@ -305,7 +305,7 @@ body {
   font-weight: 600;
   margin-top: 1rem;
   margin-bottom: 0.5rem;
-  color: #71717a;
+  color: var(--text-muted);
 }
 
 .ProseMirror p {
@@ -334,7 +334,6 @@ body {
 
 .ProseMirror mark {
   background: rgba(250, 204, 21, 0.25);
-  color: #fde047;
   padding: 2px;
   border-radius: 4px;
 }
@@ -398,9 +397,9 @@ body {
 /* Blockquotes */
 /* -------------------------------- */
 .ProseMirror blockquote {
-  border-left: 4px solid #3b82f6;
-  background: #18181b;
-  color: #d4d4d8;
+  border-left: 4px solid var(--accent);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
   padding: 1rem;
   margin: 1rem 0;
   border-radius: 12px;
@@ -411,7 +410,7 @@ body {
 
 .ProseMirror code {
   font-family: Consolas, Monaco, monospace;
-  background: #f4f4f5;
+  background: var(--bg-secondary);
   color: #e11d48;
   padding: 2px 6px;
   border-radius: 6px;
@@ -419,9 +418,9 @@ body {
 }
 
 .ProseMirror pre {
-  background: #111827;
-  color: #f9fafb;
-  border: 1px solid #27272a;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 1rem;
   overflow-x: auto;
@@ -439,11 +438,11 @@ body {
 /* -------------------------------- */
 
 .ProseMirror a {
-  color: #60a5fa;
+  color: var(--accent-text);
 }
 
 .ProseMirror a:hover {
-  color: #93c5fd;
+  color: var(--accent-hover);
 }
 
 /* -------------------------------- */
@@ -460,7 +459,7 @@ body {
 }
 
 .ProseMirror img.ProseMirror-selectednode {
-  outline: 3px solid #2563eb;
+  outline: 3px solid var(--accent);
 }
 
 /* -------------------------------- */
@@ -469,7 +468,7 @@ body {
 
 .ProseMirror hr {
   border: none;
-  border-top: 1px solid #27272a;
+  border-top: 1px solid var(--border);
   margin: 2rem 0;
 }
 /* -------------------------------- */
@@ -480,28 +479,30 @@ body {
   width: 100%;
   border-collapse: collapse;
   margin: 1rem 0;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .ProseMirror th {
-  background: #18181b;
-  color: #fafafa;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .ProseMirror td,
 .ProseMirror th {
-  border: 1px solid #27272a;
+  border: 1px solid var(--border);
   padding: 0.75rem;
 }
 
 .ProseMirror tr:hover {
-  background: #18181b;
+  background: var(--bg-hover);
 }
 /* -------------------------------- */
 /* Selection */
 /* -------------------------------- */
 
 .ProseMirror ::selection {
-  background: #202e3f;
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
 /* -------------------------------- */
@@ -510,7 +511,7 @@ body {
 
 .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
-  color: #71717a;
+  color: var(--text-muted);
   pointer-events: none;
   float: left;
   height: 0;
@@ -521,7 +522,7 @@ body {
 /* -------------------------------- */
 
 .ProseMirror .ProseMirror-dropcursor {
-  border-left: 3px solid #2563eb;
+  border-left: 3px solid var(--accent);
 }
 
 /* -------------------------------- */
@@ -565,7 +566,7 @@ body {
   width: 18px;
   height: 18px;
 
-  border: 2px solid #3f3f46;
+  border: 2px solid var(--border);
   border-radius: 6px;
 
   cursor: pointer;
@@ -574,12 +575,12 @@ body {
   display: grid;
   place-items: center;
 
-  background: #18181b;
+  background: var(--bg-secondary);
 }
 
 .ProseMirror ul[data-type="taskList"] input[type="checkbox"]:checked {
-  background: #3b82f6;
-  border-color: #3b82f6;
+  background: var(--accent);
+  border-color: var(--accent);
 }
 
 .ProseMirror ul[data-type="taskList"] input[type="checkbox"]::before {
@@ -600,13 +601,13 @@ body {
 }
 
 .ProseMirror ul[data-type="taskList"] input[type="checkbox"]:hover {
-  border-color: #60a5fa;
+  border-color: var(--accent-text);
   transform: scale(1.05);
 }
 
 .ProseMirror ul[data-type="taskList"] li[data-checked="true"] > div {
   text-decoration: line-through;
-  color: #71717a;
+  color: var(--text-muted);
   opacity: 0.7;
 }
 
@@ -620,16 +621,16 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #27272a;
+  background: var(--border);
   border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3f3f46;
+  background: var(--text-muted);
 }
 
 ::-webkit-scrollbar-thumb:active {
-  background: #52525b;
+  background: var(--text-secondary);
 }
 
 @keyframes alert-pop {
