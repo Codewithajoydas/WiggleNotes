@@ -377,13 +377,13 @@ export default function Sidebar() {
             New Note
           </SideNavLink>
 
-          {/* <SideNavLink
+          <SideNavLink
             to="/templates"
             icon={<LayoutTemplate size={15} />}
             colors={COLORS}
           >
             Templates
-          </SideNavLink> */}
+          </SideNavLink>
 
           {/* Search button */}
           <button
