@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.9](https://github.com/Codewithajoydas/WiggleNotes/compare/v0.0.8...v0.0.9) (2026-07-03)
+
+
+### Features
+
+* add note templates and auto-generate note titles ([983aa01](https://github.com/Codewithajoydas/WiggleNotes/commit/983aa01c6c886d5f59179b5af22ca4f6ea0a005c))
+
+
+### Bug Fixes
+
+* resolve autosave toggle bug and improve theming/contrast system ([86bd23f](https://github.com/Codewithajoydas/WiggleNotes/commit/86bd23f338c0edcc26e04bd2de451e5f95e6e6e5))
+
 ### [0.0.8](https://github.com/Codewithajoydas/WiggleNotes/compare/v0.0.7...v0.0.8) (2026-06-28)
 
 ### [0.0.7](https://github.com/Codewithajoydas/WiggleNotes/compare/v0.0.6...v0.0.7) (2026-06-27)
