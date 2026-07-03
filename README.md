@@ -1,114 +1,136 @@
+# WiggleNote
+
+**An offline-first desktop notebook for writing, organizing, and managing knowledge.**
+
+WiggleNote is a modern desktop note-taking application built for users who want a fast, distraction-free writing experience while keeping their data under their control. Whether you're taking personal notes, documenting projects, or building a knowledge base, WiggleNote helps you stay organized without relying on the cloud.
 
 
-# <img width="32" height="32" alt="image" src="https://github.com/user-attachments/assets/0c83e627-ac3a-4da0-a52e-92e3744bfdb3" /> WiggleNote 
+## Features
 
-WiggleNote is a desktop notebook built for people who write a lot of notes and don't want a complicated workspace.
-
-No accounts. No subscriptions. No cloud dependency.
-
-Just open the app and start writing.
-
-The app stores everything locally using SQLite, so your notes remain on your machine and are available even without an internet connection.
-
-
-## What You Can Do
-
-* Create and edit notes
-* Pin important notes
-* Mark notes as favorites
-* Search notes instantly
-* Restore deleted notes from Trash
-* Write with a rich text editor
-* Add headings, lists, code blocks, tables and images
-* Organize notes without leaving the keyboard
+* Offline-first experience
+* Rich text and Markdown editing
+* Clean, modern interface
+* Fast note creation and editing
+* Local data storage
+* Powerful search
+* Reusable templates
+* Keyboard shortcuts
+* Cross-platform desktop application
+* Automatic updates (when configured)
 
 
-## Editor Features
-
-The editor supports:
-
-* Headings
-* Bold
-* Italic
-* Underline
-* Blockquotes
-* Bullet Lists
-* Numbered Lists
-* Task Lists
-* Tables
-* Images
-* Links
-* Code Blocks
-* Horizontal Rules
+## Screenshots
+<img width="1365" height="713" alt="image" src="https://github.com/user-attachments/assets/14d27742-aa54-46b5-a0da-de19633b7a6d" />
+<img width="1365" height="720" alt="image" src="https://github.com/user-attachments/assets/a4d10b01-b889-4f8f-afe4-c413cdd5b29b" />
+<img width="1365" height="719" alt="image" src="https://github.com/user-attachments/assets/5a13bbca-4f4f-4f00-9b83-1506315509f7" />
+<img width="1365" height="719" alt="image" src="https://github.com/user-attachments/assets/24b2e64d-3f62-46cd-bb48-115c53a60fb6" />
 
 
-## Built With
+## Technology Stack
 
-* React
 * Electron
-* Tailwind CSS
-* TipTap
+* React
+* Tiptap Editor
+* Vite
 * SQLite
-* better-sqlite3
+  
 
 
-## Running Locally
+## Installation
 
-Install dependencies:
+### Download
+
+Download the latest release from the **Releases** section.
+
+### Development
 
 ```bash
+git clone https://github.com/YOUR_USERNAME/wigglenote.git
+
+cd wigglenote
+
 npm install
-```
 
-Start the development server:
-
-```bash
 npm run dev
 ```
 
-Run Electron:
+---
+
+## Build
 
 ```bash
-npm start
+npm run build
 ```
 
+---
 
-## Current Features
+## Project Structure
 
-* Notes
-* Rich Text Editing
-* Favorites
-* Pinned Notes
-* Search
-* Trash
-* Restore Notes
-* Context Menu
-* Settings Page
-* Local Database Storage
+```text
+wigglenote/
+├── src/
+├── electron/
+├── public/
+├── assets/
+├── docs/
+└── package.json
+```
 
+---
 
-## Planned
+## Why WiggleNote?
 
-* Export Notes
-* Import Notes
-* Themes
-* Folder Support
-* Keyboard Shortcuts
-* Automatic Backups
+Many note-taking applications depend heavily on cloud services. WiggleNote is designed with a different philosophy:
 
+* Your notes stay on your device.
+* Fast startup and editing.
+* Clean writing environment.
+* Built for productivity.
 
-## Why I Built This
+---
 
-Most note-taking applications either feel too simple or try to become an entire operating system.
+## Roadmap
 
-WiggleNote was created as a lightweight desktop notebook focused on one thing: writing and organizing notes quickly.
+* [ ] Cloud synchronization
+* [ ] End-to-end encrypted sync
+* [ ] Mobile companion application
+* [ ] Plugin system
+* [ ] AI-powered writing assistance
+* [ ] Collaborative editing
+
+---
+
+## Contributing
+
+Contributions, bug reports, and feature requests are welcome.
+
+1. Fork the repository.
+2. Create a feature branch.
+3. Commit your changes.
+4. Open a Pull Request.
+
+---
+
+## Reporting Issues
+
+If you find a bug or have a feature request, please open an issue in this repository with as much detail as possible.
 
 ---
 
 ## License
 
-MIT
+This project is licensed under the MIT License.
 
 ---
 
-Made by [Ajoy Das](https://github.com/codewithajoydas).
+## Author
+
+**Ajoy Das**
+
+If you find this project useful, consider giving it a star on GitHub. It helps others discover the project and supports future development.
+
+---
+
+## Support
+
+If you have questions, suggestions, or feedback, feel free to open an issue or start a discussion in the repository.
